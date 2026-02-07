@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵感挖掘机 - 个人创意需求分析工具</title>
+    <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent-color: #ec4899;
+            --bg-color: #f8fafc;
+            --grid-color: #e2e8f0;
+            --node-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-secondary: #64748b;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --radius: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(var(--grid-color) 1px, transparent 1px);
+            background-size: 24px 24px;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 顶部导航栏 */
+        header {
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--grid-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background-color: white;
+            color: var(--text-secondary);
+            border: 1px solid var(--grid-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        /* 主工作区 */
+        main {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        main:active {
+            cursor: grabbing;
+        }
+
+        /* 侧边工具栏 */
+        .sidebar {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 260px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            transition: transform 0.3s ease;
+            z-index: 50;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-110%);
+        }
+
+        .sidebar-section h3 {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .tool-card {
+            background: #f8fafc;
+            border: 1px solid var(--grid-color);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tool-card:hover {
+            border-color: var(--primary-color);
+            background: #eff6ff;
+        }
+
+        .tool-title {
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .tool-desc {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        /* 节点样式 */
+        .node {
+            position: absolute;
+            background: var(--node-bg);
+            padding: 12px 16px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-md);
+            min-width: 120px;
+            max-width: 240px;
+            cursor: pointer;
+            border-left: 4px solid var(--primary-color);
+            user-select: none;
+            transition: box-shadow 0.2s, transform 0.1s;
+            z-index: 10;
+        }
+
+        .node:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .node.selected {
+            ring: 2px solid var(--primary-color);
+            transform: scale(1.02);
+            z-index: 20;
+        }
+
+        .node-content {
+            font-size: 0.95rem;
+            line-height: 1.4;
+            outline: none;
+        }
+
+        .node-tag {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            background: #e0e7ff;
+            color: var(--primary-color);
+            border-radius: 4px;
+            margin-bottom: 6px;
+        }
+
+        /* SVG 连接线层 */
+        #svg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        path {
+            fill: none;
+            stroke: #cbd5e1;
+            stroke-width: 2px;
+            transition: stroke 0.2s;
+        }
+
+        /* 弹窗/模态框 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(20px);
+            transition: transform 0.2s;
+        }
+
+        .modal-overlay.active .modal {
+            transform: translateY(0);
+        }
+
+        .modal h2 {
+            margin-bottom: 16px;
+            font-size: 1.25rem;
+        }
+
+        .modal textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border: 1px solid var(--grid-color);
+            border-radius: 8px;
+            margin-bottom: 16px;
+            resize: none;
+            font-size: 0.95rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        /* 提示框 */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e293b;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 300;
+        }
+        
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* 快捷键提示 */
+        .shortcuts-hint {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.8);
+            padding: 10px;
+            border-radius: 8px;
+            pointer-events: none;
+        }
+
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .question-option {
+            padding: 10px;
+            border: 1px solid var(--grid-color);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .question-option:hover {
+            border-color: var(--primary-color);
+            background-color: #f0fdfa;
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path><path d="M8.5 8.5v.01"></path><path d="M16 16v.01"></path><path d="M12 12v.01"></path></svg>
+            灵感挖掘机
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="app.clearCanvas()">清空画布</button>
+            <button class="btn btn-primary" onclick="app.exportData()">保存进度</button>
+        </div>
+    </header>
+
+    <main id="canvas-container">
+        <svg id="svg-layer"></svg>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <h3>挖掘工具箱</h3>
+                
+                <div class="tool-card" onclick="app.showDeepDiveModal()">
+                    <div class="tool-title">🔍 深度挖掘</div>
+                    <div class="tool-desc">针对选中的节点，通过提问深入分析核心需求。</div>
+                </div>
+
+                <div class="tool-card" onclick="app.randomSpark()">
+                    <div class="tool-title">⚡ 随机火花</div>
+                    <div class="tool-desc">没有灵感？随机生成一个关键词或场景刺激大脑。</div>
+                </div>
+
+                <div class="tool-card" onclick="app.expandNode()">
+                    <div class="tool-title">🌳 分支扩张</div>
+                    <div class="tool-desc">快速为当前节点添加一个子节点。</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>当前选中</h3>
+                <div id="selected-node-info" style="font-size: 0.9rem; color: var(--text-secondary);">
+                    未选择任何节点
+                </div>
+                <button class="btn btn-secondary" style="width:100%; margin-top:10px; display:none;" id="delete-btn" onclick="app.deleteSelectedNode()">删除节点</button>
+            </div>
+        </div>
+        <div class="shortcuts-hint">
+            双击空白处: 新建节点 | 拖拽: 移动 | Shift+拖拽: 连线 | Delete: 删除
+        </div>
+    </main>
+
+    <!-- 模态框：深度挖掘 -->
+    <div class="modal-overlay" id="deep-dive-modal">
+        <div class="modal">
+            <h2>灵感挖掘：基于 "<span id="modal-node-title"></span>"</h2>
+            <p style="margin-bottom: 15px; color: #64748b;">选择一个引导问题来扩展你的思维：</p>
+            
+            <div class="question-options" id="question-list">
+                <!-- 动态生成问题 -->
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="app.closeModal('deep-dive-modal')">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框：回答问题 -->
+    <div class="modal-overlay" id="answer-modal">
+        <div class="modal">
+            <h2 id="answer-question-title">问题</h2>
+            <textarea id="answer-input" placeholder="在此输入你的想法..."></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('answer-modal')">取消</button>
+                <button class="btn btn-primary" onclick="app.submitAnswer()">确认创建</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框：新建节点 -->
+    <div class="modal-overlay" id="create-modal">
+        <div class="modal">
+            <h2>新建灵感节点</h2>
+            <textarea id="create-input" placeholder="输入你的核心想法..."></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('create-modal')">取消</button>
+                <button class="btn btn-primary" onclick="app.submitCreateNode()">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">操作成功</div>
+
+    <script>
+        /**
+         * 灵感挖掘机 - 核心逻辑
+         */
+        const app = (() => {
+            // 状态管理
+            const state = {
+                nodes: [],
+                connections: [],
+                nextId: 1,
+                selectedNodeId: null,
+                isDragging: false,
+                dragNodeId: null,
+                dragOffset: { x: 0, y: 0 },
+                isConnecting: false,
+                connectSourceId: null,
+                scale: 1
+            };
+
+            // DOM 元素
+            const container = document.getElementById('canvas-container');
+            const svgLayer = document.getElementById('svg-layer');
+            const selectedInfo = document.getElementById('selected-node-info');
+            const deleteBtn = document.getElementById('delete-btn');
+
+            // 灵感库：用于随机生成和提问
+            const inspirationData = {
+                sparkWords: ["未来主义", "极简主义", "自然共生", "虚拟现实", "复古风潮", "社区连接", "可持续性", "游戏化", "情感化设计", "自动化"],
+                sparkScenes: ["在拥挤的地铁里", "下雨的午后咖啡馆", "深夜的办公室", "充满绿植的阳台", "极客的桌面", "混乱的厨房"],
+                questions: [
+                    "这个创意的核心痛点是什么？",
+                    "如果完全不考虑技术限制，它会是什么样？",
+                    "谁会最需要这个？他们是什么样的人？",
+                    "这个想法的反面是什么？",
+                    "如何让它比现在简单十倍？",
+                    "如果把它的某个特征放大，会发生什么？",
+                    "用户在使用时的情绪如何？",
+                    "三年后，这个想法还有价值吗？",
+                    "它可能带来什么意想不到的副作用？",
+                    "有没有比这个更笨的解决方案？"
+                ]
+            };
+
+            // --- 初始化 ---
+            function init() {
+                loadData();
+                setupEventListeners();
+                render();
+                window.addEventListener('resize', renderLines);
+            }
+
+            // --- 事件监听 ---
+            function setupEventListeners() {
+                // 画布点击（处理创建和取消选中）
+                container.addEventListener('mousedown', (e) => {
+                    if (e.target === container || e.target === svgLayer) {
+                        // 如果是按住Shift，不取消选中，可能用于拖拽画布(暂未实现画布拖拽)或准备连线
+                        if (!e.shiftKey) {
+                            deselectNode();
+                        }
+                    }
+                });
+
+                // 双击画布创建节点
+                container.addEventListener('dblclick', (e) => {
+                    if (e.target === container || e.target === svgLayer) {
+                        openCreateModal(e.offsetX, e.offsetY);
+                    }
+                });
+
+                // 键盘删除
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Delete' || e.key === 'Backspace') {
+                        // 避免在输入框中删除节点
+                        if (document.activeElement.tagName !== 'TEXTAREA' && state.selectedNodeId) {
+                            deleteSelectedNode();
+                        }
+                    }
+                });
+
+                // 鼠标移动（处理拖拽和连线）
+                container.addEventListener('mousemove', (e) => {
+                    if (state.isDragging && state.dragNodeId) {
+                        const node = state.nodes.find(n => n.id === state.dragNodeId);
+                        if (node) {
+                            node.x = e.clientX - state.dragOffset.x;
+                            node.y = e.clientY - state.dragOffset.y;
+                            updateNodePosition(node);
+                            renderLines();
+                        }
+                    } else if (state.isConnecting && state.connectSourceId) {
+                        // 绘制临时连线
+                        renderTempLine(e.clientX, e.clientY);
+                    }
+                });
+
+                // 鼠标松开
+                container.addEventListener('mouseup', (e) => {
+                    if (state.isConnecting) {
+                        // 检查是否释放在某个节点上
+                        const targetNodeEl = e.target.closest('.node');
+                        if (targetNodeEl) {
+                            const targetId = parseInt(targetNodeEl.dataset.id);
+                            if (targetId !== state.connectSourceId) {
+                                toggleConnection(state.connectSourceId, targetId);
+                            }
+                        }
+                        // 清理临时线
+                        const tempLine = document.getElementById('temp-line');
+                        if(tempLine) tempLine.remove();
+                        state.isConnecting = false;
+                        state.connectSourceId = null;
+                        container.style.cursor = 'default';
+                    }
+                    state.isDragging = false;
+                    state.dragNodeId = null;
+                });
+            }
+
+            // --- 核心功能 ---
+
+            function createNode(x, y, text = "新想法") {
+                const node = {
+                    id: state.nextId++,
+                    x: x,
+                    y: y,
+                    text: text,
+                    type: 'default',
+                    createdAt: new Date().toISOString()
+                };
+                state.nodes.push(node);
+                renderNode(node);
+                showToast("节点已创建");
+                return node;
+            }
+
+            function renderNode(node) {
+                const div = document.createElement('div');
+                div.className = 'node';
+                div.dataset.id = node.id;
+                div.style.left = `${node.x}px`;
+                div.style.top = `${node.y}px`;
+                
+                // 随机边框颜色，增加视觉丰富度
+                const colors = ['#6366f1', '#ec4899', '#10b981', '#f59e0b', '#8b5cf6'];
+                const color = colors[node.id % colors.length];
+                div.style.borderLeftColor = color;
+
+                div.innerHTML = `
+                    <div class="node-content" contenteditable="true" spellcheck="false">${node.text}</div>
+                `;
+
+                // 绑定节点事件
+                div.addEventListener('mousedown', (e) => {
+                    if (e.button !== 0) return; // 只响应左键
+                    e.stopPropagation(); // 防止触发画布事件
+
+                    if (e.shiftKey) {
+                        // 开始连线模式
+                        state.isConnecting = true;
+                        state.connectSourceId = node.id;
+                        const source = getNodeCenter(node);
+                        // 创建临时线
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        path.id = 'temp-line';
+                        path.setAttribute('d', `M ${source.x} ${source.y} L ${source.x} ${source.y}`);
+                        path.style.strokeDasharray = "5,5"; // 虚线效果
+                        svgLayer.appendChild(path);
+                    } else {
+                        // 选中并准备拖拽
+                        selectNode(node.id);
+                        state.isDragging = true;
+                        state.dragNodeId = node.id;
+                        state.dragOffset.x = e.clientX - node.x;
+                        state.dragOffset.y = e.clientY - node.y;
+                    }
+                });
+
+                div.addEventListener('input', (e) => {
+                    node.text = e.target.innerText;
+                });
+
+                // 双击节点也可以编辑，这里利用contenteditable直接编辑
+                // 如果需要双击触发模态框编辑，可以在这里加逻辑
+
+                container.appendChild(div);
+            }
+
+            function updateNodePosition(node) {
+                const el = document.querySelector(`.node[data-id="${node.id}"]`);
+                if (el) {
+                    el.style.left = `${node.x}px`;
+                    el.style.top = `${node.y}px`;
+                }
+            }
+
+            function selectNode(id) {
+                state.selectedNodeId = id;
+                document.querySelectorAll('.node').forEach(el => el.classList.remove('selected'));
+                const el = document.querySelector(`.node[data-id="${id}"]`);
+                if (el) el.classList.add('selected');
+
+                const node = state.nodes.find(n => n.id === id);
+                selectedInfo.innerHTML = `<strong>节点 #${id}</strong><br>${node.text.substring(0, 20)}...`;
+                deleteBtn.style.display = 'block';
+            }
+
+            function deselectNode() {
+                state.selectedNodeId = null;
+                document.querySelectorAll('.node').forEach(el => el.classList.remove('selected'));
+                selectedInfo.innerText = "未选择任何节点";
+                deleteBtn.style.display = 'none';
+            }
+
+            function deleteSelectedNode() {
+                if (!state.selectedNodeId) return;
+                
+                // 删除关联线
+                state.connections = state.connections.filter(c => c.from !== state.selectedNodeId && c.to !== state.selectedNodeId);
+                
+                // 删除节点
+                state.nodes = state.nodes.filter(n => n.id !== state.selectedNodeId);
+                
+                // 移除DOM
+                const el = document.querySelector(`.node[data-id="${state.selectedNodeId}"]`);
+                if (el) el.remove();
+                
+                deselectNode();
+                renderLines();
+                showToast("节点已删除");
+            }
+
+            // --- 连线逻辑 ---
+
+            function toggleConnection(fromId, toId) {
+                // 检查是否已存在
+                const exists = state.connections.find(c => 
+                    (c.from === fromId && c.to === toId) || (c.from === toId && c.to === fromId)
+                );
+                
+                if (exists) {
+                    // 如果存在则删除
+                    state.connections = state.connections.filter(c => c !== exists);
+                    showToast("连接已断开");
+                } else {
+                    // 不存在则添加
+                    state.connections.push({ from: fromId, to: toId });
+                    showToast("连接成功");
+                }
+                renderLines();
+            }
+
+            function renderLines() {
+                // 清空SVG
+                svgLayer.innerHTML = '';
+                
+                state.connections.forEach(conn => {
+                    const n1 = state.nodes.find(n => n.id === conn.from);
+                    const n2 = state.nodes.find(n => n.id === conn.to);
+                    if (!n1 || !n2) return;
+
+                    const p1 = getNodeCenter(n1);
+                    const p2 = getNodeCenter(n2);
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    // 贝塞尔曲线
+                    const deltaY = p2.y - p1.y;
+                    const controlY1 = p1.y + deltaY * 0.5;
+                    const controlY2 = p2.y - deltaY * 0.5;
+                    
+                    const d = `M ${p1.x} ${p1.y} C ${p1.x} ${controlY1}, ${p2.x} ${controlY2}, ${p2.x} ${p2.y}`;
+                    
+                    path.setAttribute('d', d);
+                    svgLayer.appendChild(path);
+                });
+            }
+
+            function renderTempLine(mouseX, mouseY) {
+                const path = document.getElementById('temp-line');
+                if (!path) return;
+                
+                const sourceNode = state.nodes.find(n => n.id === state.connectSourceId);
+                if (!sourceNode) return;
+                
+                const p1 = getNodeCenter(sourceNode);
+                // 简单直线用于拖拽预览
+                path.setAttribute('d', `M ${p1.x} ${p1.y} L ${mouseX} ${mouseY}`);
+            }
+
+            function getNodeCenter(node) {
+                const el = document.querySelector(`.node[data-id="${node.id}"]`);
+                // 简单估算，避免复杂getBoundingClientRect调用
+                const width = el ? el.offsetWidth : 150;
+                const height = el ? el.offsetHeight : 60;
+                return {
+                    x: node.x + width / 2,
+                    y: node.y + height / 2
+                };
+            }
+
+            // --- 工具箱功能 ---
+
+            // 1. 深度挖掘
+            function showDeepDiveModal() {
+                if (!state.selectedNodeId) {
+                    showToast("请先在画布上选择一个节点");
+                    return;
+                }
+                const node = state.nodes.find(n => n.id === state.selectedNodeId);
+                
+                // 随机选取3个不重复的问题
+                const qList = document.getElementById('question-list');
+                qList.innerHTML = '';
+                
+                const shuffled = inspirationData.questions.sort(() => 0.5 - Math.random());
+                const selectedQs = shuffled.slice(0, 3);
+
+                selectedQs.forEach(q => {
+                    const div = document.createElement('div');
+                    div.className = 'question-option';
+                    div.innerText = q;
+                    div.onclick = () => openAnswerModal(q);
+                    qList.appendChild(div);
+                });
+
+                document.getElementById('modal-node-title').innerText = node.text.substring(0, 10);
+                document.getElementById('deep-dive-modal').classList.add('active');
+            }
+
+            function openAnswerModal(question) {
+                closeModal('deep-dive-modal');
+                document.getElementById('answer-question-title').innerText = question;
+                document.getElementById('answer-input').value = '';
+                document.getElementById('answer-modal').classList.add('active');
+                setTimeout(() => document.getElementById('answer-input').focus(), 100);
+            }
+
+            function submitAnswer() {
+                const answer = document.getElementById('answer-input').value.trim();
+                if (!answer) return;
+
+                // 找到父节点位置，在附近创建子节点
+                const parentNode = state.nodes.find(n => n.id === state.selectedNodeId);
+                const offsetX = (Math.random() - 0.5) * 200 + 200;
+                const offsetY = (Math.random() - 0.5) * 200;
+
+                const newNode = createNode(parentNode.x + offsetX, parentNode.y + offsetY, answer);
+                
+                // 自动连线
+                state.connections.push({ from: state.selectedNodeId, to: newNode.id });
+                renderLines();
+                
+                closeModal('answer-modal');
+                selectNode(newNode.id); // 选中新节点
+                showToast("挖掘完成，新节点已生成");
+            }
+
+            // 2. 随机火花
+            function randomSpark() {
+                const word = inspirationData.sparkWords[Math.floor(Math.random() * inspirationData.sparkWords.length)];
+                const scene = inspirationData.sparkScenes[Math.floor(Math.random() * inspirationData.sparkScenes.length)];
+                
+                // 放在画布中心随机位置
+                const cx = container.clientWidth / 2 + (Math.random() - 0.5) * 300;
+                const cy = container.clientHeight / 2 + (Math.random() - 0.5) * 300;
+                
+                const text = `${word} + ${scene}`;
+                const node = createNode(cx, cy, text);
+                selectNode(node.id);
+            }
+
+            // 3. 分支扩张
+            function expandNode() {
+                if (!state.selectedNodeId) {
+                    showToast("请先选择一个节点");
+                    return;
+                }
+                const parentNode = state.nodes.find(n => n.id === state.selectedNodeId);
+                
+                const offsetX = 150;
+                const offsetY = 0;
+                const newNode = createNode(parentNode.x + offsetX, parentNode.y + offsetY, "新分支...");
+                state.connections.push({ from: state.selectedNodeId, to: newNode.id });
+                renderLines();
+                selectNode(newNode.id);
+            }
+
+            // --- 模态框控制 ---
+
+            function openCreateModal(x, y) {
+                // 存储临时坐标
+                state.tempCreateX = x;
+                state.tempCreateY = y;
+                document.getElementById('create-input').value = '';
+                document.getElementById('create-modal').classList.add('active');
+                setTimeout(() => document.getElementById('create-input').focus(), 100);
+            }
+
+            function submitCreateNode() {
+                const text = document.getElementById('create-input').value.trim();
+                if (text) {
+                    createNode(state.tempCreateX, state.tempCreateY, text);
+                }
+                closeModal('create-modal');
+            }
+
+            function closeModal(id) {
+                document.getElementById(id).classList.remove('active');
+            }
+
+            // --- 全局操作 ---
+
+            function clearCanvas() {
+                if(confirm('确定要清空画布吗？所有未保存的内容将丢失。')) {
+                    state.nodes = [];
+                    state.connections = [];
+                    container.innerHTML = '<svg id="svg-layer"></svg>'; // 重置DOM
+                    // 重新获取引用
+                    // (因为之前的逻辑直接append，所以这里暴力清空后需要重新渲染初始结构)
+                    // 简单起见，刷新SVG引用
+                    // 实际上应该更优雅地清空，这里为了简化代码逻辑：
+                    document.querySelectorAll('.node').forEach(el => el.remove());
+                    renderLines();
+                    deselectNode();
+                    showToast("画布已清空");
+                }
+            }
+
+            function saveData() {
+                localStorage.setItem('inspomine_data', JSON.stringify({
+                    nodes: state.nodes,
+                    connections: state.connections,
+                    nextId: state.nextId
+                }));
+                showToast("进度已保存到本地");
+            }
+
+            function loadData() {
+                const data = localStorage.getItem('inspomine_data');
+                if (data) {
+                    try {
+                        const parsed = JSON.parse(data);
+                        state.nodes = parsed.nodes || [];
+                        state.connections = parsed.connections || [];
+                        state.nextId = parsed.nextId || 1;
+                        
+                        // 重建DOM
+                        state.nodes.forEach(node => renderNode(node));
+                        // 稍微延迟渲染线，确保DOM尺寸已计算
+                        setTimeout(renderLines, 50);
+                    } catch (e) {
+                        console.error("加载数据失败", e);
+                    }
+                } else {
+                    // 初始欢迎节点
+                    const welcomeNode = createNode(window.innerWidth/2 - 100, window.innerHeight/2 - 50, "双击任意处开始创作\n或使用左侧工具箱");
+                    deleteBtn.style.display = 'none'; // 初始不显示删除
+                }
+            }
+
+            function exportData() {
+                saveData();
+                // 模拟导出文件
+                const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
+                    nodes: state.nodes,
+                    connections: state.connections
+                }));
+                const downloadAnchorNode = document.createElement('a');
+                downloadAnchorNode.setAttribute("href", dataStr);
+                downloadAnchorNode.setAttribute("download", "inspiration_mine.json");
+                document.body.appendChild(downloadAnchorNode);
+                downloadAnchorNode.click();
+                downloadAnchorNode.remove();
+            }
+
+            function showToast(msg) {
+                const t = document.getElementById('toast');
+                t.innerText = msg;
+                t.classList.add('show');
+                setTimeout(() => t.classList.remove('show'), 2000);
+            }
+
+            function render() {
+                // 初始渲染逻辑（目前主要在loadData中处理）
+            }
+
+            // 暴露给HTML的接口
+            return {
+                init,
+                showDeepDiveModal,
+                randomSpark,
+                expandNode,
+                deleteSelectedNode,
+                clearCanvas,
+                exportData,
+                closeModal,
+                submitAnswer,
+                submitCreateNode
+            };
+        })();
+
+        // 启动应用
+        window.addEventListener('DOMContentLoaded', app.init);
+
+    </script>
+</body>
+</html>

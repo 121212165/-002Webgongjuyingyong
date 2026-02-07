@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵感挖掘机 - 设置</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background: #f8fafc;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6366f1, #ec4899);
+            padding: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+        }
+
+        .section h2 {
+            font-size: 1.1rem;
+            color: #1e293b;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+
+        .form-group .hint {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 6px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #059669;
+        }
+
+        .actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .status {
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d1fae5;
+            color: #065f46;
+            display: block;
+        }
+
+        .status.error {
+            background: #fee2e2;
+            color: #991b1b;
+            display: block;
+        }
+
+        .status.info {
+            background: #dbeafe;
+            color: #1e40af;
+            display: block;
+        }
+
+        .preset-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .preset-btn {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: #e2e8f0;
+            border-color: #6366f1;
+        }
+
+        .toggle-switch {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .toggle {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: #e2e8f0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .toggle.active {
+            background: #6366f1;
+        }
+
+        .toggle::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .toggle.active::after {
+            transform: translateX(24px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>⚙️ 灵感挖掘机设置</h1>
+            <p>配置AI服务以启用智能功能</p>
+        </div>
+
+        <div class="content">
+            <div id="status" class="status"></div>
+
+            <div class="section">
+                <h2>🤖 AI 服务配置</h2>
+                
+                <div class="form-group">
+                    <label>选择服务提供商</label>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" onclick="applyPreset('openai')">OpenAI</button>
+                        <button class="preset-btn" onclick="applyPreset('anthropic')">Anthropic Claude</button>
+                        <button class="preset-btn" onclick="applyPreset('deepseek')">DeepSeek</button>
+                        <button class="preset-btn" onclick="applyPreset('ollama')">Ollama (本地)</button>
+                        <button class="preset-btn" onclick="applyPreset('custom')">自定义</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="provider">提供商</label>
+                    <select id="provider" onchange="updateProvider()">
+                        <option value="openai">OpenAI</option>
+                        <option value="anthropic">Anthropic</option>
+                        <option value="custom">自定义</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="apiEndpoint">API 端点</label>
+                    <input type="text" id="apiEndpoint" placeholder="https://api.openai.com/v1/chat/completions">
+                    <div class="hint">完整的API请求URL，包括路径</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="apiKey">API 密钥</label>
+                    <input type="password" id="apiKey" placeholder="sk-...">
+                    <div class="hint">您的API密钥将安全存储在本地</div>
+                </div>
+
+                <div class="form-group">
+                    <label for="model">模型名称</label>
+                    <input type="text" id="model" placeholder="gpt-3.5-turbo">
+                    <div class="hint">例如：gpt-3.5-turbo, gpt-4, claude-3-haiku-20240307</div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>🧪 测试连接</h2>
+                <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 16px;">
+                    点击下方按钮测试您的API配置是否正确
+                </p>
+                <button class="btn btn-secondary" onclick="testConnection()">🔍 测试连接</button>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-primary" onclick="saveSettings()">💾 保存设置</button>
+                <button class="btn btn-secondary" onclick="resetSettings()">🔄 重置</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="ai-service.js"></script>
+    <script>
+        const aiService = new AIService();
+        const presets = {
+            openai: {
+                provider: 'openai',
+                apiEndpoint: 'https://api.openai.com/v1/chat/completions',
+                model: 'gpt-3.5-turbo'
+            },
+            anthropic: {
+                provider: 'anthropic',
+                apiEndpoint: 'https://api.anthropic.com/v1/messages',
+                model: 'claude-3-haiku-20240307'
+            },
+            deepseek: {
+                provider: 'openai',
+                apiEndpoint: 'https://api.deepseek.com/v1/chat/completions',
+                model: 'deepseek-chat'
+            },
+            ollama: {
+                provider: 'custom',
+                apiEndpoint: 'http://localhost:11434/v1/chat/completions',
+                model: 'llama2'
+            },
+            custom: {
+                provider: 'custom',
+                apiEndpoint: '',
+                model: ''
+            }
+        };
+
+        function loadSettings() {
+            chrome.storage.local.get(['aiConfig'], (result) => {
+                if (result.aiConfig) {
+                    document.getElementById('provider').value = result.aiConfig.provider || 'openai';
+                    document.getElementById('apiEndpoint').value = result.aiConfig.apiEndpoint || '';
+                    document.getElementById('apiKey').value = result.aiConfig.apiKey || '';
+                    document.getElementById('model').value = result.aiConfig.model || '';
+                } else {
+                    applyPreset('openai');
+                }
+            });
+        }
+
+        function applyPreset(presetName) {
+            const preset = presets[presetName];
+            if (!preset) return;
+
+            document.getElementById('provider').value = preset.provider;
+            document.getElementById('apiEndpoint').value = preset.apiEndpoint;
+            document.getElementById('model').value = preset.model;
+            
+            showStatus('已应用预设配置', 'info');
+        }
+
+        function updateProvider() {
+            const provider = document.getElementById('provider').value;
+            if (presets[provider]) {
+                applyPreset(provider);
+            }
+        }
+
+        async function saveSettings() {
+            const config = {
+                provider: document.getElementById('provider').value,
+                apiEndpoint: document.getElementById('apiEndpoint').value.trim(),
+                apiKey: document.getElementById('apiKey').value.trim(),
+                model: document.getElementById('model').value.trim()
+            };
+
+            if (!config.apiEndpoint || !config.apiKey || !config.model) {
+                showStatus('请填写所有必填字段', 'error');
+                return;
+            }
+
+            await aiService.saveConfig(config);
+            showStatus('设置已保存', 'success');
+        }
+
+        function resetSettings() {
+            if (confirm('确定要重置所有设置吗？')) {
+                chrome.storage.local.remove(['aiConfig'], () => {
+                    applyPreset('openai');
+                    document.getElementById('apiKey').value = '';
+                    showStatus('设置已重置', 'info');
+                });
+            }
+        }
+
+        async function testConnection() {
+            const config = {
+                provider: document.getElementById('provider').value,
+                apiEndpoint: document.getElementById('apiEndpoint').value.trim(),
+                apiKey: document.getElementById('apiKey').value.trim(),
+                model: document.getElementById('model').value.trim()
+            };
+
+            if (!config.apiEndpoint || !config.apiKey || !config.model) {
+                showStatus('请先填写API配置', 'error');
+                return;
+            }
+
+            showStatus('正在测试连接...', 'info');
+            
+            await aiService.saveConfig(config);
+            const result = await aiService.testConnection();
+
+            if (result.success) {
+                showStatus('✅ 连接成功！AI服务已就绪', 'success');
+            } else {
+                showStatus(`❌ 连接失败: ${result.error}`, 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    statusEl.style.display = 'none';
+                }, 5000);
+            }
+        }
+
+        loadSettings();
+    </script>
+</body>
+</html>

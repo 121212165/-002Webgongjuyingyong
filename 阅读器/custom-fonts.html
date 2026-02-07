@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自定义字体管理系统</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .upload-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #dee2e6;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .upload-area {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .upload-icon {
+            font-size: 4em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .upload-text {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .fonts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .font-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .font-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .font-card.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #f0f4ff, #fff);
+        }
+
+        .font-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .font-preview {
+            font-size: 1.5em;
+            margin: 15px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .font-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        .btn-apply {
+            background: #28a745;
+            color: white;
+            flex: 1;
+        }
+
+        .btn-apply:hover {
+            background: #218838;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c82333;
+        }
+
+        .reading-area {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .reading-title {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .reading-content {
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: #444;
+            text-align: justify;
+        }
+
+        .font-settings {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .setting-group {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .setting-label {
+            min-width: 80px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .setting-control {
+            flex: 1;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .system-fonts {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 自定义字体管理系统</h1>
+            <p>上传、管理和应用您喜爱的字体，打造个性化阅读体验</p>
+        </div>
+
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">拖拽字体文件到此处或点击上传</div>
+                <div class="upload-text" style="font-size: 0.9em; color: #999;">支持 .ttf, .otf, .woff, .woff2 格式</div>
+                <button class="upload-btn" onclick="document.getElementById('fontFile').click()">选择字体文件</button>
+                <input type="file" id="fontFile" class="file-input" accept=".ttf,.otf,.woff,.woff2" multiple>
+            </div>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <div>正在加载字体...</div>
+            </div>
+        </div>
+
+        <div class="font-settings">
+            <h3 class="section-title">字体设置</h3>
+            <div class="setting-group">
+                <label class="setting-label">字体大小:</label>
+                <div class="setting-control">
+                    <input type="range" class="slider" id="fontSizeSlider" min="12" max="32" value="16">
+                    <span id="fontSizeValue">16px</span>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label class="setting-label">行间距:</label>
+                <div class="setting-control">
+                    <input type="range" class="slider" id="lineHeightSlider" min="1.2" max="2.5" step="0.1" value="1.8">
+                    <span id="lineHeightValue">1.8</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="system-fonts">
+            <h3 class="section-title">系统字体</h3>
+            <div class="fonts-grid" id="systemFontsGrid">
+                <!-- 系统字体将在这里动态生成 -->
+            </div>
+        </div>
+
+        <div class="custom-fonts">
+            <h3 class="section-title">自定义字体</h3>
+            <div class="fonts-grid" id="customFontsGrid">
+                <!-- 自定义字体将在这里动态生成 -->
+            </div>
+        </div>
+
+        <div class="reading-area">
+            <h3 class="reading-title">字体预览区域</h3>
+            <div class="reading-content" id="readingContent">
+                <p>这是一段用于测试字体效果的示例文本。通过更换不同的字体，您可以体验到不同的阅读感受。</p>
+                <p>The quick brown fox jumps over the lazy dog. This sentence contains every letter of the English alphabet.</p>
+                <p>1234567890 !@#$%^&*()_+-=[]{}|;':",./<>?</p>
+                <p>在这个数字化时代，阅读体验的个性化变得越来越重要。选择合适的字体不仅能提升阅读的舒适度，还能反映个人的审美品味。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        class FontManager {
+            constructor() {
+                this.customFonts = JSON.parse(localStorage.getItem('customFonts') || '[]');
+                this.currentFont = localStorage.getItem('currentFont') || 'system';
+                this.systemFonts = [
+                    { name: '系统默认', family: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' },
+                    { name: '宋体', family: 'SimSun, serif' },
+                    { name: '黑体', family: 'SimHei, sans-serif' },
+                    { name: '微软雅黑', family: '"Microsoft YaHei", sans-serif' },
+                    { name: 'Arial', family: 'Arial, sans-serif' },
+                    { name: 'Times New Roman', family: '"Times New Roman", serif' },
+                    { name: 'Georgia', family: 'Georgia, serif' },
+                    { name: 'Helvetica', family: 'Helvetica, sans-serif' }
+                ];
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.renderSystemFonts();
+                this.renderCustomFonts();
+                this.setupFontSettings();
+                this.loadSavedSettings();
+            }
+
+            setupEventListeners() {
+                const fileInput = document.getElementById('fontFile');
+                const uploadArea = document.getElementById('uploadArea');
+
+                fileInput.addEventListener('change', (e) => this.handleFileUpload(e));
+
+                // 拖拽上传
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.style.borderColor = '#667eea';
+                    uploadArea.style.background = '#f0f4ff';
+                });
+
+                uploadArea.addEventListener('dragleave', (e) => {
+                    e.preventDefault();
+                    uploadArea.style.borderColor = '#dee2e6';
+                    uploadArea.style.background = '#f8f9fa';
+                });
+
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.style.borderColor = '#dee2e6';
+                    uploadArea.style.background = '#f8f9fa';
+                    
+                    const files = Array.from(e.dataTransfer.files).filter(file => 
+                        file.type.includes('font') || 
+                        ['.ttf', '.otf', '.woff', '.woff2'].some(ext => file.name.toLowerCase().endsWith(ext))
+                    );
+                    
+                    if (files.length > 0) {
+                        this.processFiles(files);
+                    }
+                });
+            }
+
+            setupFontSettings() {
+                const fontSizeSlider = document.getElementById('fontSizeSlider');
+                const fontSizeValue = document.getElementById('fontSizeValue');
+                const lineHeightSlider = document.getElementById('lineHeightSlider');
+                const lineHeightValue = document.getElementById('lineHeightValue');
+                const readingContent = document.getElementById('readingContent');
+
+                fontSizeSlider.addEventListener('input', (e) => {
+                    const size = e.target.value;
+                    fontSizeValue.textContent = size + 'px';
+                    readingContent.style.fontSize = size + 'px';
+                    localStorage.setItem('fontSize', size);
+                });
+
+                lineHeightSlider.addEventListener('input', (e) => {
+                    const height = e.target.value;
+                    lineHeightValue.textContent = height;
+                    readingContent.style.lineHeight = height;
+                    localStorage.setItem('lineHeight', height);
+                });
+            }
+
+            loadSavedSettings() {
+                const savedFontSize = localStorage.getItem('fontSize') || '16';
+                const savedLineHeight = localStorage.getItem('lineHeight') || '1.8';
+                const readingContent = document.getElementById('readingContent');
+
+                document.getElementById('fontSizeSlider').value = savedFontSize;
+                document.getElementById('fontSizeValue').textContent = savedFontSize + 'px';
+                document.getElementById('lineHeightSlider').value = savedLineHeight;
+                document.getElementById('lineHeightValue').textContent = savedLineHeight;
+
+                readingContent.style.fontSize = savedFontSize + 'px';
+                readingContent.style.lineHeight = savedLineHeight;
+
+                // 应用当前字体
+                if (this.currentFont !== 'system') {
+                    const font = this.customFonts.find(f => f.name === this.currentFont) || 
+                                this.systemFonts.find(f => f.name === this.currentFont);
+                    if (font) {
+                        readingContent.style.fontFamily = font.family;
+                    }
+                }
+            }
+
+            handleFileUpload(event) {
+                const files = Array.from(event.target.files);
+                this.processFiles(files);
+            }
+
+            async processFiles(files) {
+                const loading = document.getElementById('loading');
+                loading.style.display = 'block';
+
+                for (const file of files) {
+                    try {
+                        await this.loadFont(file);
+                    } catch (error) {
+                        console.error('字体加载失败:', error);
+                        this.showNotification('字体加载失败: ' + file.name, 'error');
+                    }
+                }
+
+                loading.style.display = 'none';
+                this.renderCustomFonts();
+            }
+
+            async loadFont(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    
+                    reader.onload = async (e) => {
+                        try {
+                            const fontName = file.name.replace(/\.[^/.]+$/, "");
+                            const fontData = e.target.result;
+                            
+                            // 创建字体面
+                            const fontFace = new FontFace(fontName, fontData);
+                            await fontFace.load();
+                            
+                            // 添加到文档
+                            document.fonts.add(fontFace);
+                            
+                            // 保存到本地存储
+                            const fontInfo = {
+                                name: fontName,
+                                family: fontName,
+                                data: fontData,
+                                fileName: file.name
+                            };
+                            
+                            // 检查是否已存在
+                            const existingIndex = this.customFonts.findIndex(f => f.name === fontName);
+                            if (existingIndex >= 0) {
+                                this.customFonts[existingIndex] = fontInfo;
+                            } else {
+                                this.customFonts.push(fontInfo);
+                            }
+                            
+                            localStorage.setItem('customFonts', JSON.stringify(this.customFonts));
+                            this.showNotification(`字体 "${fontName}" 加载成功!`);
+                            resolve();
+                        } catch (error) {
+                            reject(error);
+                        }
+                    };
+                    
+                    reader.onerror = () => reject(new Error('文件读取失败'));
+                    reader.readAsArrayBuffer(file);
+                });
+            }
+
+            renderSystemFonts() {
+                const grid = document.getElementById('systemFontsGrid');
+                grid.innerHTML = '';
+
+                this.systemFonts.forEach(font => {
+                    const card = this.createFontCard(font, false);
+                    grid.appendChild(card);
+                });
+            }
+
+            renderCustomFonts() {
+                const grid = document.getElementById('customFontsGrid');
+                grid.innerHTML = '';
+
+                if (this.customFonts.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; color: #999; grid-column: 1 / -1;">暂无自定义字体，请上传字体文件</p>';
+                    return;
+                }
+
+                this.customFonts.forEach(font => {
+                    const card = this.createFontCard(font, true);
+                    grid.appendChild(card);
+                });
+            }
+
+            createFontCard(font, isCustom) {
+                const card = document.createElement('div');
+                card.className = 'font-card';
+                if (this.currentFont === font.name) {
+                    card.classList.add('active');
+                }
+
+                card.innerHTML = `
+                    <div class="font-name">${font.name}</div>
+                    <div class="font-preview" style="font-family: ${font.family}">
+                        字体预览 Font Preview 123
+                    </div>
+                    <div class="font-actions">
+                        <button class="btn btn-apply" onclick="fontManager.applyFont('${font.name}', '${font.family}')">
+                            ${this.currentFont === font.name ? '✓ 已应用' : '应用字体'}
+                        </button>
+                        ${isCustom ? `<button class="btn btn-delete" onclick="fontManager.deleteFont('${font.name}')">删除</button>` : ''}
+                    </div>
+                `;
+
+                return card;
+            }
+
+            applyFont(name, family) {
+                const readingContent = document.getElementById('readingContent');
+                readingContent.style.fontFamily = family;
+                
+                this.currentFont = name;
+                localStorage.setItem('currentFont', name);
+                
+                this.showNotification(`已应用字体: ${name}`);
+                this.renderSystemFonts();
+                this.renderCustomFonts();
+            }
+
+            deleteFont(name) {
+                if (confirm(`确定要删除字体 "${name}" 吗？`)) {
+                    this.customFonts = this.customFonts.filter(f => f.name !== name);
+                    localStorage.setItem('customFonts', JSON.stringify(this.customFonts));
+                    
+                    // 如果删除的是当前字体，重置为系统默认
+                    if (this.currentFont === name) {
+                        this.applyFont('系统默认', this.systemFonts[0].family);
+                    }
+                    
+                    this.renderCustomFonts();
+                    this.showNotification(`字体 "${name}" 已删除`);
+                }
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // 初始化字体管理器
+        const fontManager = new FontManager();
+
+        // 页面加载时恢复自定义字体
+        window.addEventListener('load', async () => {
+            const customFonts = JSON.parse(localStorage.getItem('customFonts') || '[]');
+            
+            for (const font of customFonts) {
+                try {
+                    const fontFace = new FontFace(font.name, font.data);
+                    await fontFace.load();
+                    document.fonts.add(fontFace);
+                } catch (error) {
+                    console.error('恢复字体失败:', font.name, error);
+                }
+            }
+        });
+    </script>
+</body>
+</html>

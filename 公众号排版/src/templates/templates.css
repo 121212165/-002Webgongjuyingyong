@@ -1,0 +1,344 @@
+/**
+ * 公众号专属模板样式
+ * 适配微信公众号规范 (677px 宽度)
+ */
+
+/* ========== 通用页脚容器 ========== */
+.wechat-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--divider-color, #e0e0e0);
+}
+
+/* ========== 引导关注模块 ========== */
+.wechat-follow-module {
+    margin: 30px 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 8px;
+    color: #fff;
+}
+
+.follow-container {
+    text-align: center;
+}
+
+.follow-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+}
+
+.follow-text {
+    flex: 1;
+    min-width: 200px;
+}
+
+.follow-title {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0 0 10px 0;
+}
+
+.follow-desc {
+    font-size: 14px;
+    margin: 0;
+    opacity: 0.9;
+}
+
+.follow-qrcode {
+    text-align: center;
+}
+
+.follow-qrcode img {
+    width: 120px;
+    height: 120px;
+    border-radius: 4px;
+    background: #fff;
+    padding: 5px;
+}
+
+.qrcode-tip {
+    font-size: 12px;
+    margin: 8px 0 0 0;
+    opacity: 0.85;
+}
+
+/* ========== 赞赏模块 ========== */
+.wechat-reward-module {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.reward-container {
+    text-align: center;
+}
+
+.reward-line {
+    margin-bottom: 20px;
+}
+
+.reward-line-text {
+    font-size: 16px;
+    color: var(--text-color, #333);
+    position: relative;
+    display: inline-block;
+    padding: 0 20px;
+}
+
+.reward-line-text::before,
+.reward-line-text::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40px;
+    height: 1px;
+    background: var(--divider-color, #e0e0e0);
+}
+
+.reward-line-text::before {
+    right: 100%;
+}
+
+.reward-line-text::after {
+    left: 100%;
+}
+
+.reward-qrcode {
+    margin-top: 15px;
+}
+
+.reward-qrcode img {
+    width: 150px;
+    height: 150px;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.reward-amount {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+    margin: 10px 0 5px 0;
+}
+
+.reward-tip {
+    font-size: 12px;
+    color: var(--text-secondary, #999);
+    margin: 0;
+}
+
+/* ========== 原文链接模块 ========== */
+.wechat-link-module {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f0f7ff;
+    border-left: 4px solid var(--primary-color, #007aff);
+    border-radius: 4px;
+}
+
+.link-container {
+    text-align: center;
+}
+
+.link-description {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+    margin: 0 0 15px 0;
+}
+
+.link-button {
+    margin-top: 10px;
+}
+
+.original-link {
+    display: inline-block;
+    padding: 10px 30px;
+    background: var(--primary-color, #007aff);
+    color: #fff !important;
+    text-decoration: none !important;
+    border-radius: 20px;
+    font-size: 15px;
+    transition: all 0.3s ease;
+}
+
+.original-link:hover {
+    background: var(--primary-hover, #0056b3);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,122,255,0.3);
+}
+
+.original-link-placeholder {
+    display: inline-block;
+    padding: 10px 30px;
+    background: #ccc;
+    color: #fff;
+    border-radius: 20px;
+    font-size: 15px;
+}
+
+/* ========== 分享引导模块 ========== */
+.wechat-share-module {
+    margin: 30px 0;
+    padding: 20px;
+    text-align: center;
+}
+
+.share-container {
+    text-align: center;
+}
+
+.share-title {
+    font-size: 16px;
+    color: var(--text-color, #333);
+    margin: 0 0 15px 0;
+}
+
+/* 默认样式 - 图标 */
+.share-icons {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+}
+
+.share-icon {
+    font-size: 28px;
+    cursor: pointer;
+    transition: transform 0.2s ease;
+    display: inline-block;
+}
+
+.share-icon:hover {
+    transform: scale(1.2);
+}
+
+/* 简约样式 */
+.share-minimal {
+    margin-top: 10px;
+}
+
+.share-text-minimal {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+}
+
+/* 优雅样式 */
+.share-elegant {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.share-line-elegant {
+    width: 60px;
+    height: 1px;
+    background: var(--divider-color, #e0e0e0);
+}
+
+.share-text-elegant {
+    font-size: 14px;
+    color: var(--text-secondary, #666);
+    white-space: nowrap;
+}
+
+/* ========== 版权信息模块 ========== */
+.wechat-copyright-module {
+    margin: 30px 0;
+    padding: 20px 0;
+}
+
+.copyright-container {
+    text-align: center;
+}
+
+.copyright-line {
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--divider-color, #e0e0e0), transparent);
+    margin: 15px 0;
+}
+
+.copyright-content {
+    padding: 0 20px;
+}
+
+.copyright-info {
+    margin-bottom: 15px;
+}
+
+.copyright-item {
+    font-size: 13px;
+    color: var(--text-secondary, #666);
+    margin: 5px 0;
+}
+
+.copyright-item strong {
+    color: var(--text-color, #333);
+}
+
+.copyright-notice {
+    font-size: 12px;
+    color: var(--text-secondary, #999);
+    margin: 10px 0 0 0;
+    line-height: 1.6;
+}
+
+/* ========== 移动端适配 ========== */
+@media (max-width: 768px) {
+    .follow-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .follow-qrcode img {
+        width: 100px;
+        height: 100px;
+    }
+
+    .reward-qrcode img {
+        width: 120px;
+        height: 120px;
+    }
+
+    .share-elegant {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .share-line-elegant {
+        width: 40px;
+    }
+}
+
+/* ========== 公众号预览模式 ========== */
+.preview-content .wechat-footer {
+    max-width: 677px;
+    margin: 40px auto 0;
+}
+
+.preview-content .wechat-follow-module,
+.preview-content .wechat-reward-module,
+.preview-content .wechat-link-module,
+.preview-content .wechat-share-module,
+.preview-content .wechat-copyright-module {
+    margin: 20px 0;
+}
+
+/* ========== 打印样式 ========== */
+@media print {
+    .wechat-footer {
+        page-break-inside: avoid;
+    }
+
+    .follow-qrcode img,
+    .reward-qrcode img {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

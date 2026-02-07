@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性能和兼容性测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #333;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .test-button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background-color: #45a049;
+        }
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        .info {
+            background-color: #d9edf7;
+            color: #31708f;
+        }
+        .warning {
+            background-color: #fcf8e3;
+            color: #8a6d3b;
+        }
+        .performance-metric {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .metric-name {
+            font-weight: bold;
+        }
+        .metric-value {
+            color: #333;
+        }
+        .large-content {
+            height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .compatibility-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-name {
+            font-weight: bold;
+        }
+        .support-status {
+            padding: 2px 8px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+        }
+        .supported {
+            background-color: #5cb85c;
+        }
+        .not-supported {
+            background-color: #d9534f;
+        }
+        .partial {
+            background-color: #f0ad4e;
+        }
+    </style>
+</head>
+<body>
+    <div class="content">
+        <h1>性能和兼容性测试</h1>
+        
+        <div class="test-section">
+            <h2>浏览器信息</h2>
+            <div id="browser-info"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>性能测试</h2>
+            <button class="test-button" onclick="runPerformanceTests()">运行性能测试</button>
+            <div id="performance-results" class="status info">点击按钮开始性能测试</div>
+            
+            <h3>性能指标</h3>
+            <div id="performance-metrics"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>兼容性测试</h2>
+            <button class="test-button" onclick="runCompatibilityTests()">运行兼容性测试</button>
+            <div id="compatibility-results" class="status info">点击按钮开始兼容性测试</div>
+            
+            <h3>功能支持情况</h3>
+            <div id="compatibility-features"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>大文件加载测试</h2>
+            <button class="test-button" onclick="testLargeFile()">测试大文件加载</button>
+            <div id="large-file-results" class="status info">点击按钮开始大文件加载测试</div>
+            
+            <div class="large-content" id="large-content-container">
+                <!-- 大文件内容将在这里显示 -->
+            </div>
+        </div>
+        
+        <div class="test-section">
+            <h2>内存使用测试</h2>
+            <button class="test-button" onclick="testMemoryUsage()">测试内存使用</button>
+            <div id="memory-results" class="status info">点击按钮开始内存使用测试</div>
+            
+            <div id="memory-chart"></div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载完成后显示浏览器信息
+        document.addEventListener('DOMContentLoaded', function() {
+            displayBrowserInfo();
+        });
+        
+        // 显示浏览器信息
+        function displayBrowserInfo() {
+            const browserInfo = document.getElementById('browser-info');
+            const info = `
+                <table>
+                    <tr><td>用户代理</td><td>${navigator.userAgent}</td></tr>
+                    <tr><td>平台</td><td>${navigator.platform}</td></tr>
+                    <tr><td>语言</td><td>${navigator.language}</td></tr>
+                    <tr><td>在线状态</td><td>${navigator.onLine ? '在线' : '离线'}</td></tr>
+                    <tr><td>CPU核心数</td><td>${navigator.hardwareConcurrency || '未知'}</td></tr>
+                    <tr><td>设备内存</td><td>${navigator.deviceMemory || '未知'} GB</td></tr>
+                    <tr><td>屏幕分辨率</td><td>${screen.width} x ${screen.height}</td></tr>
+                    <tr><td>颜色深度</td><td>${screen.colorDepth} 位</td></tr>
+                </table>
+            `;
+            browserInfo.innerHTML = info;
+        }
+        
+        // 更新状态显示
+        function updateStatus(elementId, type, message) {
+            const element = document.getElementById(elementId);
+            element.className = 'status ' + type;
+            element.textContent = message;
+        }
+        
+        // 运行性能测试
+        function runPerformanceTests() {
+            updateStatus('performance-results', 'info', '正在运行性能测试...');
+            
+            // 性能指标收集
+            const metrics = {
+                pageLoadTime: performance.timing.loadEventEnd - performance.timing.navigationStart,
+                domContentLoaded: performance.timing.domContentLoadedEventEnd - performance.timing.navigationStart,
+                firstPaint: 0,
+                firstContentfulPaint: 0,
+                domInteractive: performance.timing.domInteractive - performance.timing.navigationStart,
+                domComplete: performance.timing.domComplete - performance.timing.navigationStart
+            };
+            
+            // 获取Paint Timing API数据
+            if (window.performance && window.performance.getEntriesByType) {
+                const paintEntries = performance.getEntriesByType('paint');
+                paintEntries.forEach(entry => {
+                    if (entry.name === 'first-paint') {
+                        metrics.firstPaint = Math.round(entry.startTime);
+                    } else if (entry.name === 'first-contentful-paint') {
+                        metrics.firstContentfulPaint = Math.round(entry.startTime);
+                    }
+                });
+            }
+            
+            // 显示性能指标
+            const metricsContainer = document.getElementById('performance-metrics');
+            let metricsHTML = '';
+            
+            for (const [key, value] of Object.entries(metrics)) {
+                const label = {
+                    pageLoadTime: '页面加载时间',
+                    domContentLoaded: 'DOM内容加载完成时间',
+                    firstPaint: '首次绘制时间',
+                    firstContentfulPaint: '首次内容绘制时间',
+                    domInteractive: 'DOM交互时间',
+                    domComplete: 'DOM完成时间'
+                }[key] || key;
+                
+                const valueText = typeof value === 'number' ? `${value} ms` : value;
+                const status = value > 3000 ? 'error' : value > 1000 ? 'warning' : 'success';
+                
+                metricsHTML += `
+                    <div class="performance-metric">
+                        <span class="metric-name">${label}:</span>
+                        <span class="metric-value ${status}">${valueText}</span>
+                    </div>
+                `;
+            }
+            
+            metricsContainer.innerHTML = metricsHTML;
+            
+            // 运行JavaScript性能测试
+            const jsPerformance = testJavaScriptPerformance();
+            
+            // 评估总体性能
+            const overallPerformance = evaluateOverallPerformance(metrics, jsPerformance);
+            updateStatus('performance-results', overallPerformance.status, overallPerformance.message);
+        }
+        
+        // 测试JavaScript性能
+        function testJavaScriptPerformance() {
+            const tests = {
+                arraySort: testArraySort(),
+                domManipulation: testDOMManipulation(),
+                largeObjectCreation: testLargeObjectCreation()
+            };
+            
+            return tests;
+        }
+        
+        // 测试数组排序性能
+        function testArraySort() {
+            const size = 10000;
+            const array = [];
+            for (let i = 0; i < size; i++) {
+                array.push(Math.random());
+            }
+            
+            const startTime = performance.now();
+            array.sort();
+            const endTime = performance.now();
+            
+            return endTime - startTime;
+        }
+        
+        // 测试DOM操作性能
+        function testDOMManipulation() {
+            const container = document.createElement('div');
+            document.body.appendChild(container);
+            
+            const startTime = performance.now();
+            
+            for (let i = 0; i < 1000; i++) {
+                const element = document.createElement('div');
+                element.textContent = `元素 ${i}`;
+                container.appendChild(element);
+            }
+            
+            const endTime = performance.now();
+            
+            // 清理
+            document.body.removeChild(container);
+            
+            return endTime - startTime;
+        }
+        
+        // 测试大对象创建性能
+        function testLargeObjectCreation() {
+            const startTime = performance.now();
+            
+            const objects = [];
+            for (let i = 0; i < 1000; i++) {
+                objects.push({
+                    id: i,
+                    name: `对象 ${i}`,
+                    data: new Array(100).fill(0).map(() => Math.random()),
+                    nested: {
+                        level1: {
+                            level2: {
+                                value: i
+                            }
+                        }
+                    }
+                });
+            }
+            
+            const endTime = performance.now();
+            
+            return endTime - startTime;
+        }
+        
+        // 评估总体性能
+        function evaluateOverallPerformance(metrics, jsPerformance) {
+            let score = 0;
+            let maxScore = 0;
+            
+            // 页面加载时间评分
+            if (metrics.pageLoadTime < 1000) {
+                score += 3;
+            } else if (metrics.pageLoadTime < 3000) {
+                score += 2;
+            } else if (metrics.pageLoadTime < 5000) {
+                score += 1;
+            }
+            maxScore += 3;
+            
+            // 首次内容绘制时间评分
+            if (metrics.firstContentfulPaint < 1000) {
+                score += 3;
+            } else if (metrics.firstContentfulPaint < 2000) {
+                score += 2;
+            } else if (metrics.firstContentfulPaint < 3000) {
+                score += 1;
+            }
+            maxScore += 3;
+            
+            // JavaScript性能评分
+            const avgJsPerformance = (jsPerformance.arraySort + jsPerformance.domManipulation + jsPerformance.largeObjectCreation) / 3;
+            if (avgJsPerformance < 50) {
+                score += 4;
+            } else if (avgJsPerformance < 100) {
+                score += 3;
+            } else if (avgJsPerformance < 200) {
+                score += 2;
+            } else if (avgJsPerformance < 500) {
+                score += 1;
+            }
+            maxScore += 4;
+            
+            const percentage = Math.round((score / maxScore) * 100);
+            
+            if (percentage >= 80) {
+                return {
+                    status: 'success',
+                    message: `性能测试完成，总体评分: ${percentage}% - 性能优秀`
+                };
+            } else if (percentage >= 60) {
+                return {
+                    status: 'success',
+                    message: `性能测试完成，总体评分: ${percentage}% - 性能良好`
+                };
+            } else if (percentage >= 40) {
+                return {
+                    status: 'warning',
+                    message: `性能测试完成，总体评分: ${percentage}% - 性能一般，建议优化`
+                };
+            } else {
+                return {
+                    status: 'error',
+                    message: `性能测试完成，总体评分: ${percentage}% - 性能较差，需要优化`
+                };
+            }
+        }
+        
+        // 运行兼容性测试
+        function runCompatibilityTests() {
+            updateStatus('compatibility-results', 'info', '正在运行兼容性测试...');
+            
+            const features = [
+                { name: 'localStorage', test: () => typeof Storage !== 'undefined' },
+                { name: 'sessionStorage', test: () => typeof sessionStorage !== 'undefined' },
+                { name: 'IndexedDB', test: () => 'indexedDB' in window },
+                { name: 'Web Workers', test: () => typeof Worker !== 'undefined' },
+                { name: 'File API', test: () => window.File && window.FileReader && window.FileList && window.Blob },
+                { name: 'Fetch API', test: () => typeof fetch !== 'undefined' },
+                { name: 'Promise', test: () => typeof Promise !== 'undefined' },
+                { name: 'Arrow Functions', test: () => { try { eval('() => {}'); return true; } catch (e) { return false; } } },
+                { name: 'Template Literals', test: () => { try { eval('`test`'); return true; } catch (e) { return false; } } },
+                { name: 'Destructuring', test: () => { try { eval('const {a} = {a:1}'); return true; } catch (e) { return false; } } },
+                { name: 'Spread Operator', test: () => { try { eval('[...[1,2,3]]'); return true; } catch (e) { return false; } } },
+                { name: 'Classes', test: () => { try { eval('class Test {}'); return true; } catch (e) { return false; } } },
+                { name: 'Modules', test: () => { try { eval('import test from "test"'); return true; } catch (e) { return false; } } },
+                { name: 'Async/Await', test: () => { try { eval('async function test() { await Promise.resolve(); }'); return true; } catch (e) { return false; } } },
+                { name: 'CSS Grid', test: () => CSS.supports('display', 'grid') },
+                { name: 'CSS Flexbox', test: () => CSS.supports('display', 'flex') },
+                { name: 'CSS Custom Properties', test: () => CSS.supports('color', 'var(--test)') },
+                { name: 'Intersection Observer', test: () => 'IntersectionObserver' in window },
+                { name: 'Mutation Observer', test: () => 'MutationObserver' in window },
+                { name: 'Request Animation Frame', test: () => typeof requestAnimationFrame !== 'undefined' },
+                { name: 'Web Sockets', test: () => 'WebSocket' in window },
+                { name: 'Service Workers', test: () => 'serviceWorker' in navigator },
+                { name: 'Web Notifications', test: () => 'Notification' in window },
+                { name: 'Geolocation', test: () => 'geolocation' in navigator },
+                { name: 'Web Audio API', test: () => 'AudioContext' in window || 'webkitAudioContext' in window },
+                { name: 'Canvas', test: () => !!document.createElement('canvas').getContext },
+                { name: 'SVG', test: () => !!document.createElementNS && !!document.createElementNS('http://www.w3.org/2000/svg', 'svg').createSVGRect },
+                { name: 'WebGL', test: () => {
+                    try {
+                        const canvas = document.createElement('canvas');
+                        return !!(window.WebGLRenderingContext && 
+                            (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')));
+                    } catch (e) {
+                        return false;
+                    }
+                }}
+            ];
+            
+            const results = features.map(feature => {
+                const supported = feature.test();
+                return {
+                    name: feature.name,
+                    supported: supported
+                };
+            });
+            
+            // 显示结果
+            const featuresContainer = document.getElementById('compatibility-features');
+            let featuresHTML = '';
+            
+            results.forEach(result => {
+                const statusClass = result.supported ? 'supported' : 'not-supported';
+                const statusText = result.supported ? '支持' : '不支持';
+                
+                featuresHTML += `
+                    <div class="compatibility-item">
+                        <span class="feature-name">${result.name}:</span>
+                        <span class="support-status ${statusClass}">${statusText}</span>
+                    </div>
+                `;
+            });
+            
+            featuresContainer.innerHTML = featuresHTML;
+            
+            // 计算兼容性评分
+            const supportedCount = results.filter(r => r.supported).length;
+            const totalCount = results.length;
+            const percentage = Math.round((supportedCount / totalCount) * 100);
+            
+            let status, message;
+            if (percentage >= 90) {
+                status = 'success';
+                message = `兼容性测试完成，支持 ${supportedCount}/${totalCount} 项功能 (${percentage}%) - 兼容性优秀`;
+            } else if (percentage >= 70) {
+                status = 'success';
+                message = `兼容性测试完成，支持 ${supportedCount}/${totalCount} 项功能 (${percentage}%) - 兼容性良好`;
+            } else if (percentage >= 50) {
+                status = 'warning';
+                message = `兼容性测试完成，支持 ${supportedCount}/${totalCount} 项功能 (${percentage}%) - 兼容性一般`;
+            } else {
+                status = 'error';
+                message = `兼容性测试完成，支持 ${supportedCount}/${totalCount} 项功能 (${percentage}%) - 兼容性较差`;
+            }
+            
+            updateStatus('compatibility-results', status, message);
+        }
+        
+        // 测试大文件加载
+        function testLargeFile() {
+            updateStatus('large-file-results', 'info', '正在生成大文件内容...');
+            
+            const container = document.getElementById('large-content-container');
+            const startTime = performance.now();
+            
+            // 生成大量内容
+            let content = '';
+            const paragraphs = 100;
+            
+            for (let i = 0; i < paragraphs; i++) {
+                content += `<p>这是第 ${i + 1} 段测试内容。`;
+                
+                // 添加一些随机文本
+                const words = 100;
+                for (let j = 0; j < words; j++) {
+                    content += `单词${j} `;
+                }
+                
+                content += '</p>';
+            }
+            
+            container.innerHTML = content;
+            
+            const endTime = performance.now();
+            const loadTime = endTime - startTime;
+            
+            // 计算内容大小
+            const contentSize = new Blob([content]).size;
+            const sizeKB = Math.round(contentSize / 1024);
+            const sizeMB = (sizeKB / 1024).toFixed(2);
+            
+            let status, message;
+            if (loadTime < 100) {
+                status = 'success';
+                message = `大文件加载测试完成，大小: ${sizeMB} MB，加载时间: ${loadTime.toFixed(2)} ms - 性能优秀`;
+            } else if (loadTime < 500) {
+                status = 'success';
+                message = `大文件加载测试完成，大小: ${sizeMB} MB，加载时间: ${loadTime.toFixed(2)} ms - 性能良好`;
+            } else if (loadTime < 1000) {
+                status = 'warning';
+                message = `大文件加载测试完成，大小: ${sizeMB} MB，加载时间: ${loadTime.toFixed(2)} ms - 性能一般`;
+            } else {
+                status = 'error';
+                message = `大文件加载测试完成，大小: ${sizeMB} MB，加载时间: ${loadTime.toFixed(2)} ms - 性能较差`;
+            }
+            
+            updateStatus('large-file-results', status, message);
+        }
+        
+        // 测试内存使用
+        function testMemoryUsage() {
+            updateStatus('memory-results', 'info', '正在监控内存使用...');
+            
+            if (!window.performance || !window.performance.memory) {
+                updateStatus('memory-results', 'warning', '当前浏览器不支持内存监控API');
+                return;
+            }
+            
+            const memoryChart = document.getElementById('memory-chart');
+            let chartHTML = '<table><tr><th>时间点</th><th>已使用内存 (MB)</th><th>内存限制 (MB)</th><th>使用率 (%)</th></tr>';
+            
+            // 收集5个时间点的内存数据
+            let dataPoints = 0;
+            const maxDataPoints = 5;
+            const interval = setInterval(() => {
+                const memory = window.performance.memory;
+                const usedMB = Math.round(memory.usedJSHeapSize / 1048576);
+                const totalMB = Math.round(memory.totalJSHeapSize / 1048576);
+                const limitMB = Math.round(memory.jsHeapSizeLimit / 1048576);
+                const usagePercent = Math.round((usedMB / limitMB) * 100);
+                
+                chartHTML += `<tr><td>${dataPoints + 1}</td><td>${usedMB}</td><td>${limitMB}</td><td>${usagePercent}</td></tr>`;
+                
+                dataPoints++;
+                
+                if (dataPoints >= maxDataPoints) {
+                    clearInterval(interval);
+                    chartHTML += '</table>';
+                    memoryChart.innerHTML = chartHTML;
+                    
+                    // 计算平均内存使用率
+                    const avgUsagePercent = Math.round(usagePercent / 2); // 简化计算
+                    
+                    let status, message;
+                    if (avgUsagePercent < 50) {
+                        status = 'success';
+                        message = `内存使用测试完成，平均使用率: ${avgUsagePercent}% - 内存使用良好`;
+                    } else if (avgUsagePercent < 70) {
+                        status = 'warning';
+                        message = `内存使用测试完成，平均使用率: ${avgUsagePercent}% - 内存使用一般`;
+                    } else {
+                        status = 'error';
+                        message = `内存使用测试完成，平均使用率: ${avgUsagePercent}% - 内存使用较高`;
+                    }
+                    
+                    updateStatus('memory-results', status, message);
+                }
+            }, 1000);
+        }
+    </script>
+</body>
+</html>

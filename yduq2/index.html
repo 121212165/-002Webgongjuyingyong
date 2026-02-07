@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>本地阅读应用</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- 导入页面 -->
+    <div id="importPage" class="page">
+        <div class="import-container">
+            <h1>本地阅读应用</h1>
+            <p>请导入您的书籍文件或扫描目录</p>
+            <div class="import-options">
+                <label for="fileInput" class="import-btn">
+                    <input type="file" id="fileInput" accept=".txt,.epub,.pdf,.mobi,.azw,.azw3" style="display: none;">
+                    <span>选择文件</span>
+                </label>
+                <label for="directoryInput" class="import-btn">
+                    <input type="file" id="directoryInput" webkitdirectory directory multiple style="display: none;">
+                    <span>扫描目录</span>
+                </label>
+                <div class="drag-area" id="dragArea">
+                    <span>或拖拽文件到此处</span>
+                </div>
+            </div>
+            <div class="library-section">
+                <div class="library-header">
+                    <h2>我的图书馆</h2>
+                    <div class="library-controls">
+                        <button id="scanDirectoryBtn" class="library-btn">重新扫描</button>
+                        <input type="text" id="searchInput" placeholder="搜索书籍..." class="search-input">
+                        <select id="sortSelect" class="sort-select">
+                            <option value="title">按标题排序</option>
+                            <option value="author">按作者排序</option>
+                            <option value="date">按日期添加</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="book-library" id="bookLibrary">
+                    <!-- 书籍库将通过JavaScript动态生成 -->
+                </div>
+            </div>
+            <div class="recent-books" id="recentBooks">
+                <h2>最近阅读</h2>
+                <div class="book-list" id="bookList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 阅读器页面 -->
+    <div id="readerPage" class="page" style="display: none;">
+        <!-- 顶部导航栏 -->
+        <header class="reader-header">
+            <div class="header-left">
+                <button id="backBtn" class="header-btn">返回</button>
+                <span id="bookTitle" class="book-title"></span>
+            </div>
+            <div class="header-right">
+                <button id="menuBtn" class="header-btn">目录</button>
+                <button id="bookmarkBtn" class="header-btn">书签</button>
+            </div>
+        </header>
+
+        <!-- 阅读内容区域 -->
+        <main class="reader-content" id="readerContent">
+            <!-- 内容将通过JavaScript动态生成 -->
+        </main>
+
+        <!-- 底部工具栏 -->
+        <footer class="reader-footer">
+            <div class="footer-left">
+                <button id="prevBtn" class="footer-btn">上一章</button>
+                <span id="progressText" class="progress-text">0%</span>
+                <button id="nextBtn" class="footer-btn">下一章</button>
+            </div>
+            <div class="footer-right">
+                <button id="settingsBtn" class="footer-btn">设置</button>
+            </div>
+        </footer>
+
+        <!-- 侧边栏菜单 -->
+        <div id="sidebar" class="sidebar">
+            <div class="sidebar-header">
+                <h3 id="sidebarTitle">目录</h3>
+                <button id="closeSidebar" class="sidebar-close">关闭</button>
+            </div>
+            <div class="sidebar-content" id="sidebarContent">
+                <!-- 目录或书签列表将通过JavaScript动态生成 -->
+            </div>
+        </div>
+
+        <!-- 设置面板 -->
+        <div id="settingsPanel" class="settings-panel">
+            <div class="settings-content">
+                <div class="settings-header">
+                    <h3>阅读设置</h3>
+                    <button id="closeSettings" class="settings-close">关闭</button>
+                </div>
+                <div class="settings-section">
+                    <h4>主题</h4>
+                    <div class="theme-options">
+                        <button id="dayMode" class="theme-btn active">日间</button>
+                        <button id="nightMode" class="theme-btn">夜间</button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>字体大小</h4>
+                    <div class="font-size-control">
+                        <button id="decreaseFont" class="font-btn">A-</button>
+                        <span id="fontSizeDisplay" class="font-size-display">16</span>
+                        <button id="increaseFont" class="font-btn">A+</button>
+                    </div>
+                </div>
+                <div class="settings-section">
+                    <h4>阅读统计</h4>
+                    <div class="reading-stats">
+                        <p>总阅读时长: <span id="totalReadingTime">0</span> 分钟</p>
+                        <p>本次阅读: <span id="currentReadingTime">0</span> 分钟</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 遮罩层 -->
+        <div id="overlay" class="overlay" style="display: none;"></div>
+    </div>
+
+    <script src="epub.js"></script>
+    <script src="reader.js"></script>
+    <script src="indexeddb.js"></script>
+    <script src="app.js"></script>
+    <script src="test-script.js"></script>
+    <script src="performance-test.js"></script>
+</body>
+</html>

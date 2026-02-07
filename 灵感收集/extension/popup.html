@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>灵感挖掘机 - 个人创意需求分析工具</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"></path><path d="M8.5 8.5v.01"></path><path d="M16 16v.01"></path><path d="M12 12v.01"></path></svg>
+            灵感挖掘机
+        </div>
+        <div class="header-actions">
+            <button class="btn btn-secondary" onclick="app.openSettings()">⚙️ 设置</button>
+            <button class="btn btn-secondary" onclick="app.clearCanvas()">清空画布</button>
+            <button class="btn btn-primary" onclick="app.exportData()">保存进度</button>
+        </div>
+    </header>
+
+    <main id="canvas-container">
+        <svg id="svg-layer"></svg>
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <h3>挖掘工具箱</h3>
+                
+                <div class="tool-card" onclick="app.showDeepDiveModal()">
+                    <div class="tool-title">🔍 深度挖掘</div>
+                    <div class="tool-desc">针对选中的节点，通过提问深入分析核心需求。</div>
+                </div>
+
+                <div class="tool-card" onclick="app.randomSpark()">
+                    <div class="tool-title">⚡ 随机火花</div>
+                    <div class="tool-desc">没有灵感？随机生成一个关键词或场景刺激大脑。</div>
+                </div>
+
+                <div class="tool-card" onclick="app.expandNode()">
+                    <div class="tool-title">🌳 分支扩张</div>
+                    <div class="tool-desc">快速为当前节点添加一个子节点。</div>
+                </div>
+
+                <div class="tool-card" onclick="app.aiExpand()">
+                    <div class="tool-title">🤖 AI扩展</div>
+                    <div class="tool-desc">使用AI智能生成相关想法（需配置API）。</div>
+                </div>
+            </div>
+
+            <div class="sidebar-section">
+                <h3>当前选中</h3>
+                <div id="selected-node-info" style="font-size: 0.9rem; color: var(--text-secondary);">
+                    未选择任何节点
+                </div>
+                <button class="btn btn-secondary" style="width:100%; margin-top:10px; display:none;" id="delete-btn" onclick="app.deleteSelectedNode()">删除节点</button>
+            </div>
+        </div>
+        <div class="shortcuts-hint">
+            双击空白处: 新建节点 | 拖拽: 移动 | Shift+拖拽: 连线 | Delete: 删除
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="deep-dive-modal">
+        <div class="modal">
+            <h2>灵感挖掘：基于 "<span id="modal-node-title"></span>"</h2>
+            <p style="margin-bottom: 15px; color: #64748b;">选择一个引导问题来扩展你的思维：</p>
+            
+            <div class="question-options" id="question-list">
+            </div>
+
+            <div class="modal-actions" style="margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="app.closeModal('deep-dive-modal')">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="answer-modal">
+        <div class="modal">
+            <h2 id="answer-question-title">问题</h2>
+            <textarea id="answer-input" placeholder="在此输入你的想法..."></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('answer-modal')">取消</button>
+                <button class="btn btn-primary" onclick="app.submitAnswer()">确认创建</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="create-modal">
+        <div class="modal">
+            <h2>新建灵感节点</h2>
+            <textarea id="create-input" placeholder="输入你的核心想法..."></textarea>
+            <div class="modal-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('create-modal')">取消</button>
+                <button class="btn btn-primary" onclick="app.submitCreateNode()">创建</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="ai-modal">
+        <div class="modal">
+            <h2 id="ai-modal-title">AI生成</h2>
+            <div id="ai-loading" style="display:none; text-align:center; padding:20px;">
+                <div class="loading-spinner" style="width:30px;height:30px;border-width:3px;"></div>
+                <p style="margin-top:10px;color:var(--text-secondary);">AI正在思考...</p>
+            </div>
+            <div id="ai-results" class="question-options" style="display:none;">
+            </div>
+            <div class="modal-actions" style="margin-top: 20px;" id="ai-modal-actions">
+                <button class="btn btn-secondary" onclick="app.closeModal('ai-modal')">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">操作成功</div>
+
+    <script src="ai-service.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>公众号排版器 - Markdown 编辑器</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="src/themes/themes.css">
+    <link rel="stylesheet" href="src/templates/templates.css">
+    <link rel="stylesheet" href="src/ai/ai.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <h2>排版工具</h2>
+            
+            <div class="section">
+                <h3>主题选择</h3>
+                <div class="theme-buttons">
+                    <button class="theme-btn active" data-theme="simple">简约主题</button>
+                    <button class="theme-btn" data-theme="elegant">优雅主题</button>
+                    <button class="theme-btn" data-theme="modern">现代主题</button>
+                    <button class="theme-btn" data-theme="dark">暗色主题</button>
+                    <button class="theme-btn" data-theme="minimal">极简主题</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>预览模式</h3>
+                <div class="preview-mode-buttons">
+                    <button class="preview-mode-btn active" data-mode="desktop">桌面端</button>
+                    <button class="preview-mode-btn" data-mode="mobile">手机端</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>文章信息</h3>
+                <div class="article-info">
+                    <input type="text" id="articleTitle" placeholder="请输入文章标题">
+                    <input type="text" id="articleAuthor" placeholder="作者（可选）">
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>公众号模板</h3>
+                <div class="template-toggles">
+                    <label class="template-toggle">
+                        <input type="checkbox" id="toggleFollow" checked>
+                        <span>引导关注</span>
+                    </label>
+                    <label class="template-toggle">
+                        <input type="checkbox" id="toggleReward">
+                        <span>赞赏模块</span>
+                    </label>
+                    <label class="template-toggle">
+                        <input type="checkbox" id="toggleLink">
+                        <span>原文链接</span>
+                    </label>
+                    <label class="template-toggle">
+                        <input type="checkbox" id="toggleShare">
+                        <span>分享引导</span>
+                    </label>
+                    <label class="template-toggle">
+                        <input type="checkbox" id="toggleCopyright" checked>
+                        <span>版权信息</span>
+                    </label>
+                </div>
+                <button id="configTemplates" class="config-btn">⚙️ 配置模板</button>
+            </div>
+
+            <div class="section">
+                <h3>统计分析</h3>
+                <div class="stats">
+                    <div class="stat-item">
+                        <span class="stat-label">字数</span>
+                        <span class="stat-value" id="charCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">段落</span>
+                        <span class="stat-value" id="paragraphCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">图片</span>
+                        <span class="stat-value" id="imageCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">标题</span>
+                        <span class="stat-value" id="headingCount">0</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">阅读时长</span>
+                        <span class="stat-value" id="readTime">0 分钟</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>版本管理</h3>
+                <div class="version-buttons">
+                    <button id="saveVersion">保存版本</button>
+                    <button id="showVersions">查看历史</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>导出</h3>
+                <div class="export-buttons">
+                    <button id="exportMd">导出 Markdown</button>
+                    <button id="exportPdf">导出 PDF</button>
+                    <button id="exportWechat">复制公众号格式</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <h3>操作</h3>
+                <div class="action-buttons">
+                    <button id="clearContent">清空内容</button>
+                    <button id="resetTheme">重置主题</button>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="auto-save-status">
+                    <span id="saveStatus">已自动保存</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="toolbar">
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" data-action="bold" title="加粗 (Ctrl+B)">
+                        <strong>B</strong>
+                    </button>
+                    <button class="toolbar-btn" data-action="italic" title="斜体 (Ctrl+I)">
+                        <em>I</em>
+                    </button>
+                    <button class="toolbar-btn" data-action="underline" title="下划线 (Ctrl+U)">
+                        <u>U</u>
+                    </button>
+                    <button class="toolbar-btn" data-action="strikethrough" title="删除线">
+                        <s>S</s>
+                    </button>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" data-action="h1" title="一级标题 (Ctrl+1)">H1</button>
+                    <button class="toolbar-btn" data-action="h2" title="二级标题 (Ctrl+2)">H2</button>
+                    <button class="toolbar-btn" data-action="h3" title="三级标题 (Ctrl+3)">H3</button>
+                    <button class="toolbar-btn" data-action="h4" title="四级标题 (Ctrl+4)">H4</button>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" data-action="ul" title="无序列表">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <line x1="3" y1="6" x2="3.01" y2="6"/>
+                            <line x1="3" y1="12" x2="3.01" y2="12"/>
+                            <line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="ol" title="有序列表">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="10" y1="6" x2="21" y2="6"/>
+                            <line x1="10" y1="12" x2="21" y2="12"/>
+                            <line x1="10" y1="18" x2="21" y2="18"/>
+                            <path d="M4 6h1v4"/>
+                            <path d="M4 10h2"/>
+                            <path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="quote" title="引用">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 21c3 0 7-1 7-8V5c0-1.25-.756-2.017-2-2H4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                            <path d="M15 21c3 0 7-1 7-8V5c0-1.25-.757-2.017-2-2h-4c-1.25 0-2 .75-2 1.972V11c0 1.25.75 2 2 2 1 0 1 0 1 1v1c0 1-1 2-2 2s-1 .008-1 1.031V20c0 1 0 1 1 1z"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="code" title="代码块">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="16 18 22 12 16 6"/>
+                            <polyline points="8 6 2 12 8 18"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="inlineCode" title="行内代码">
+                        <code>&lt;/&gt;</code>
+                    </button>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" data-action="link" title="链接 (Ctrl+K)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="image" title="插入图片">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <circle cx="8.5" cy="8.5" r="1.5"/>
+                            <polyline points="21 15 16 10 5 21"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="divider" title="分割线">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="4" y1="12" x2="20" y2="12"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="table" title="表格">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="3" y1="9" x2="21" y2="9"/>
+                            <line x1="3" y1="15" x2="21" y2="15"/>
+                            <line x1="9" y1="3" x2="9" y2="21"/>
+                            <line x1="15" y1="3" x2="15" y2="21"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn" data-action="undo" title="撤销 (Ctrl+Z)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 7v6h6"/>
+                            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn" data-action="redo" title="重做 (Ctrl+Y)">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 7v6h-6"/>
+                            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="toolbar-divider"></div>
+
+                <div class="toolbar-group">
+                    <button class="toolbar-btn ai-trigger-btn" data-action="ai" title="AI 标题优化">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                            <path d="M2 17l10 5 10-5"/>
+                            <path d="M2 12l10 5 10-5"/>
+                        </svg>
+                        <span>AI</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="editor-container">
+                <div class="editor-wrapper">
+                    <div class="editor-label">Markdown 编辑</div>
+                    <textarea id="editor" placeholder="开始输入 Markdown 内容...&#10;&#10;# 标题&#10;&#10;## 二级标题&#10;&#10;这是一段普通文本，**加粗**、*斜体*、~~删除线~~&#10;&#10;- 无序列表项&#10;- 另一项&#10;&#10;1. 有序列表项&#10;2. 另一项&#10;&#10;> 引用内容&#10;&#10;```javascript&#10;console.log('Hello World');&#10;```"></textarea>
+                </div>
+
+                <div class="preview-wrapper">
+                    <div class="preview-label">实时预览</div>
+                    <div id="preview" class="preview-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="versionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>历史版本</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="versionList"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="templateModal">
+        <div class="modal-content template-modal-content">
+            <div class="modal-header">
+                <h3>公众号模板配置</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body template-modal-body">
+                <div class="template-config-section">
+                    <h4>引导关注模块</h4>
+                    <div class="config-item">
+                        <label>关注文案</label>
+                        <input type="text" id="followText" placeholder="欢迎关注我的公众号">
+                    </div>
+                    <div class="config-item">
+                        <label>描述文案</label>
+                        <input type="text" id="followDesc" placeholder="获取更多精彩内容">
+                    </div>
+                    <div class="config-item">
+                        <label>二维码图片</label>
+                        <input type="text" id="followQrCode" placeholder="图片 URL">
+                    </div>
+                </div>
+
+                <div class="template-config-section">
+                    <h4>赞赏模块</h4>
+                    <div class="config-item">
+                        <label>赞赏文案</label>
+                        <input type="text" id="rewardText" placeholder="如果这篇文章对您有帮助，欢迎赞赏支持">
+                    </div>
+                    <div class="config-item">
+                        <label>赞赏金额提示</label>
+                        <input type="text" id="rewardAmount" placeholder="随心">
+                    </div>
+                    <div class="config-item">
+                        <label>赞赏码图片</label>
+                        <input type="text" id="rewardQrCode" placeholder="图片 URL">
+                    </div>
+                </div>
+
+                <div class="template-config-section">
+                    <h4>原文链接模块</h4>
+                    <div class="config-item">
+                        <label>链接文字</label>
+                        <input type="text" id="linkText" placeholder="点击查看原文">
+                    </div>
+                    <div class="config-item">
+                        <label>描述文案</label>
+                        <input type="text" id="linkDesc" placeholder="更多精彩内容，请点击阅读原文">
+                    </div>
+                    <div class="config-item">
+                        <label>链接地址</label>
+                        <input type="text" id="linkUrl" placeholder="https://...">
+                    </div>
+                </div>
+
+                <div class="template-config-section">
+                    <h4>分享引导模块</h4>
+                    <div class="config-item">
+                        <label>标题</label>
+                        <input type="text" id="shareTitle" placeholder="觉得不错，点个赞吧">
+                    </div>
+                    <div class="config-item">
+                        <label>分享文案</label>
+                        <input type="text" id="shareText" placeholder="欢迎分享给朋友，让更多人看到">
+                    </div>
+                    <div class="config-item">
+                        <label>样式风格</label>
+                        <select id="shareStyle">
+                            <option value="default">默认（图标）</option>
+                            <option value="minimal">简约</option>
+                            <option value="elegant">优雅</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="template-config-section">
+                    <h4>版权信息模块</h4>
+                    <div class="config-item">
+                        <label>作者</label>
+                        <input type="text" id="copyrightAuthor" placeholder="作者名称">
+                    </div>
+                    <div class="config-item">
+                        <label>来源</label>
+                        <input type="text" id="copyrightSource" placeholder="原创">
+                    </div>
+                    <div class="config-item">
+                        <label>许可协议</label>
+                        <input type="text" id="copyrightLicense" placeholder="CC BY-NC-SA 4.0">
+                    </div>
+                    <div class="config-item">
+                        <label>版权声明</label>
+                        <input type="text" id="copyrightNotice" placeholder="本文为原创内容，转载请注明出处">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" id="resetTemplates">重置</button>
+                <button class="btn-primary" id="saveTemplateConfig">保存配置</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 面板 -->
+    <div id="aiPanel">
+        <div class="ai-panel-header">
+            <h2>✨ AI 标题优化</h2>
+            <button class="ai-close-btn" id="closeAIPanel">&times;</button>
+        </div>
+        <div class="ai-panel-content" id="aiResults">
+            <div class="ai-placeholder">
+                <p>点击下方按钮开始 AI 优化</p>
+            </div>
+        </div>
+        <div class="ai-panel-actions">
+            <button class="ai-action-btn primary" id="optimizeTitleBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+                    <path d="M2 17l10 5 10-5"/>
+                    <path d="M2 12l10 5 10-5"/>
+                </svg>
+                AI 优化标题
+            </button>
+            <button class="ai-action-btn secondary" id="checkQualityBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                </svg>
+                质量检测（本地）
+            </button>
+            <button class="ai-action-btn secondary ai-config-btn" id="configAIBtn">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                配置 API Key
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script type="module" src="src/main.js"></script>
+</body>
+</html>

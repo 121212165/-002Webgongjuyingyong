@@ -1,0 +1,19 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "apiKey": {
+      "type": "string",
+      "description": "AI API Key"
+    },
+    "apiEndpoint": {
+      "type": "string",
+      "description": "API Endpoint URL"
+    },
+    "model": {
+      "type": "string",
+      "description": "Model name"
+    }
+  },
+  "required": ["apiKey", "apiEndpoint", "model"]
+}

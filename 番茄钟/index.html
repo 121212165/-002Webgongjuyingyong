@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>番茄钟 - 专注计时</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h1>时钟</h1>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-view="focus-session">
+                    <span class="nav-icon">⏱️</span>
+                    <span>专注时段</span>
+                </div>
+                <div class="nav-item" data-view="timer">
+                    <span class="nav-icon">⌛</span>
+                    <span>计时器</span>
+                </div>
+                <div class="nav-item" data-view="alarm">
+                    <span class="nav-icon">🔔</span>
+                    <span>闹钟</span>
+                </div>
+                <div class="nav-item" data-view="stopwatch">
+                    <span class="nav-icon">⏱️</span>
+                    <span>秒表</span>
+                </div>
+                <div class="nav-item" data-view="world-clock">
+                    <span class="nav-icon">🌍</span>
+                    <span>世界时钟</span>
+                </div>
+            </nav>
+            <div class="sidebar-footer">
+                <div class="user-status">
+                    <span class="status-icon">🔄</span>
+                    <span>正在登录</span>
+                </div>
+                <div class="settings-button">
+                    <span class="nav-icon">⚙️</span>
+                    <span>设置</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- 专注时段视图 -->
+            <div class="view focus-session-view">
+                <div class="dashboard">
+                    <!-- 左侧面板 - 专注准备 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>准备专注</h2>
+                            <div class="card-actions">
+                                <button class="action-button">🦻</button>
+                                <button class="action-button">...</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <p class="focus-description">我们将在每个会话期间关闭通知和应用警报。对于较长的会话，我们将添加简短的休息时间，以便你可以恢复精力。</p>
+                            <div class="time-selector">
+                                <input type="number" id="focus-duration" value="120" min="1" max="480">
+                                <select id="time-unit">
+                                    <option value="minutes">分钟</option>
+                                </select>
+                            </div>
+                            <p class="rest-info">你将有 3 次休息时间。</p>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="skip-rest">
+                                <label for="skip-rest">跳过休息</label>
+                            </div>
+                            <button id="start-focus-button" class="primary-button">启动专注时段</button>
+                        </div>
+                    </div>
+
+                    <!-- 右侧面板 - 每日进度 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>每日进度</h2>
+                            <div class="card-actions">
+                                <button class="action-button">📝</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="progress-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">昨天</span>
+                                    <span class="stat-value">0</span>
+                                    <span class="stat-unit">分钟</span>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="progress-ring">
+                                        <svg class="progress-circle" width="120" height="120">
+                                            <circle class="progress-background" cx="60" cy="60" r="50" fill="none" stroke="#333" stroke-width="8"></circle>
+                                            <circle class="progress-fill" cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="157.08"></circle>
+                                        </svg>
+                                        <div class="progress-text">
+                                            <span class="daily-target">每日目标</span>
+                                            <span class="target-value">1</span>
+                                            <span class="target-unit">小时</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">连续达标日</span>
+                                    <span class="stat-value">0</span>
+                                    <span class="stat-unit">天</span>
+                                </div>
+                            </div>
+                            <p class="completed-info">已完成：30 分钟</p>
+                        </div>
+                    </div>
+
+                    <!-- 下方面板 - 任务跟踪 -->
+                    <div class="dashboard-card task-card">
+                        <div class="card-header">
+                            <h2>会话选择任务</h2>
+                            <div class="card-actions">
+                                <button class="action-button">➕</button>
+                                <button class="action-button">...</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="task-tracking">
+                                <h3>保持跟踪</h3>
+                                <p>添加任务并将其分配到全天中的专注时段。</p>
+                                <button class="add-task-button">➕ 添加任务</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 计时中视图 -->
+            <div class="view focusing-view hidden">
+                <div class="dashboard">
+                    <!-- 左侧面板 - 专注计时 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>专注时间段 (第 <span id="current-session">1</span> 个/共 <span id="total-sessions">4</span> 个)</h2>
+                            <div class="card-actions">
+                                <button class="action-button">别</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="timer-display">
+                                <svg class="timer-circle" width="200" height="200">
+                                    <circle class="timer-background" cx="100" cy="100" r="90" fill="none" stroke="#333" stroke-width="8"></circle>
+                                    <circle class="timer-fill" cx="100" cy="100" r="90" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-dasharray="565.48" stroke-dashoffset="0"></circle>
+                                    <g class="timer-markers">
+                                        <!-- 计时环刻度 -->
+                                    </g>
+                                </svg>
+                                <div class="timer-text">
+                                    <span id="timer-minutes">26</span>分钟
+                                </div>
+                            </div>
+                            <div class="timer-controls">
+                                <button id="pause-timer-button" class="control-button">⏸️</button>
+                                <button class="action-button">...</button>
+                            </div>
+                            <p class="next-session-info">下一个：5 分钟休息</p>
+                        </div>
+                    </div>
+
+                    <!-- 右侧面板 - 每日进度 -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <h2>每日进度</h2>
+                            <div class="card-actions">
+                                <button class="action-button">📝</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="progress-stats">
+                                <div class="stat-item">
+                                    <span class="stat-label">昨天</span>
+                                    <span class="stat-value">0</span>
+                                    <span class="stat-unit">分钟</span>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="progress-ring">
+                                        <svg class="progress-circle" width="120" height="120">
+                                            <circle class="progress-background" cx="60" cy="60" r="50" fill="none" stroke="#333" stroke-width="8"></circle>
+                                            <circle class="progress-fill" cx="60" cy="60" r="50" fill="none" stroke="#10b981" stroke-width="8" stroke-linecap="round" stroke-dasharray="314.16" stroke-dashoffset="157.08"></circle>
+                                        </svg>
+                                        <div class="progress-text">
+                                            <span class="daily-target">每日目标</span>
+                                            <span class="target-value">1</span>
+                                            <span class="target-unit">小时</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="stat-item">
+                                    <span class="stat-label">连续达标日</span>
+                                    <span class="stat-value">0</span>
+                                    <span class="stat-unit">天</span>
+                                </div>
+                            </div>
+                            <p class="completed-info">已完成：30 分钟</p>
+                        </div>
+                    </div>
+
+                    <!-- 下方面板 - 任务跟踪 -->
+                    <div class="dashboard-card task-card">
+                        <div class="card-header">
+                            <h2>你正在关注</h2>
+                            <div class="card-actions">
+                                <button class="action-button">➕</button>
+                                <button class="action-button">...</button>
+                            </div>
+                        </div>
+                        <div class="card-content">
+                            <div class="task-tracking">
+                                <h3>保持跟踪</h3>
+                                <p>添加任务并将其分配到全天中的专注时段。</p>
+                                <button class="add-task-button">➕ 添加任务</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

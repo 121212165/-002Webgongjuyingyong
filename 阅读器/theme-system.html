@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>主题系统 - 个性化阅读体验</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --text-color: #333;
+            --bg-color: #ffffff;
+            --card-bg: #ffffff;
+            --border-color: #e0e0e0;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            padding: 20px;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            color: var(--text-color);
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .theme-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .control-section {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .control-section:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+        }
+
+        .theme-card {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+            border: 3px solid transparent;
+        }
+
+        .theme-card:hover {
+            transform: scale(1.05);
+        }
+
+        .theme-card.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .theme-card::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 8px;
+            font-size: 0.8em;
+            text-align: center;
+            transform: translateY(100%);
+            transition: var(--transition);
+        }
+
+        .theme-card:hover::after {
+            transform: translateY(0);
+        }
+
+        /* 预设主题样式 */
+        .theme-light {
+            background: linear-gradient(135deg, #ffffff, #f8f9fa);
+        }
+
+        .theme-dark {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+        }
+
+        .theme-sepia {
+            background: linear-gradient(135deg, #f4f1e8, #e8dcc0);
+        }
+
+        .theme-green {
+            background: linear-gradient(135deg, #e8f5e8, #c8e6c9);
+        }
+
+        .theme-blue {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+        }
+
+        .theme-purple {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+        }
+
+        .background-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            gap: 10px;
+        }
+
+        .bg-option {
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            border: 2px solid transparent;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .bg-option:hover {
+            transform: scale(1.05);
+        }
+
+        .bg-option.active {
+            border-color: var(--primary-color);
+        }
+
+        .setting-group {
+            margin-bottom: 20px;
+        }
+
+        .setting-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: var(--border-color);
+            outline: none;
+            -webkit-appearance: none;
+            margin-bottom: 10px;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: var(--primary-color);
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+
+        .reading-preview {
+            background: var(--card-bg);
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .preview-title {
+            font-size: 1.8em;
+            color: var(--text-color);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .preview-content {
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: var(--text-color);
+            text-align: justify;
+        }
+
+        .custom-bg-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 15px;
+        }
+
+        .custom-bg-upload:hover {
+            border-color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .preset-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: var(--transition);
+            flex: 1;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        /* 夜间模式样式 */
+        body.dark-theme {
+            --text-color: #e0e0e0;
+            --bg-color: #1a1a1a;
+            --card-bg: #2d2d2d;
+            --border-color: #404040;
+            --shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 护眼模式样式 */
+        body.eye-care-theme {
+            --text-color: #5d4e37;
+            --bg-color: #f4f1e8;
+            --card-bg: #faf8f3;
+            --border-color: #e8dcc0;
+        }
+
+        /* 自定义背景样式 */
+        body.custom-bg {
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+        }
+
+        body.custom-bg .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        body.custom-bg.dark-theme .container {
+            background: rgba(45, 45, 45, 0.95);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(400px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎨 主题系统</h1>
+            <p>打造专属的个性化阅读环境，让阅读更加舒适愉悦</p>
+        </div>
+
+        <div class="theme-controls">
+            <!-- 预设主题 -->
+            <div class="control-section">
+                <h3 class="section-title">
+                    <span>🌈</span>
+                    预设主题
+                </h3>
+                <div class="theme-grid">
+                    <div class="theme-card theme-light active" data-name="明亮模式" data-theme="light"></div>
+                    <div class="theme-card theme-dark" data-name="夜间模式" data-theme="dark"></div>
+                    <div class="theme-card theme-sepia" data-name="护眼模式" data-theme="sepia"></div>
+                    <div class="theme-card theme-green" data-name="清新绿" data-theme="green"></div>
+                    <div class="theme-card theme-blue" data-name="海洋蓝" data-theme="blue"></div>
+                    <div class="theme-card theme-purple" data-name="优雅紫" data-theme="purple"></div>
+                </div>
+            </div>
+
+            <!-- 背景设置 -->
+            <div class="control-section">
+                <h3 class="section-title">
+                    <span>🖼️</span>
+                    背景设置
+                </h3>
+                <div class="custom-bg-upload" id="bgUpload">
+                    <div>📁 点击上传自定义背景</div>
+                    <div style="font-size: 0.8em; color: #999; margin-top: 5px;">支持 JPG, PNG, WebP 格式</div>
+                    <input type="file" id="bgFile" accept="image/*" style="display: none;">
+                </div>
+                <div class="background-grid">
+                    <div class="bg-option" style="background: linear-gradient(135deg, #667eea, #764ba2);" data-bg="gradient1"></div>
+                    <div class="bg-option" style="background: linear-gradient(135deg, #f093fb, #f5576c);" data-bg="gradient2"></div>
+                    <div class="bg-option" style="background: linear-gradient(135deg, #4facfe, #00f2fe);" data-bg="gradient3"></div>
+                    <div class="bg-option" style="background: linear-gradient(135deg, #43e97b, #38f9d7);" data-bg="gradient4"></div>
+                    <div class="bg-option" style="background: linear-gradient(135deg, #fa709a, #fee140);" data-bg="gradient5"></div>
+                    <div class="bg-option" style="background: linear-gradient(135deg, #a8edea, #fed6e3);" data-bg="gradient6"></div>
+                </div>
+            </div>
+
+            <!-- 阅读设置 -->
+            <div class="control-section">
+                <h3 class="section-title">
+                    <span>📖</span>
+                    阅读设置
+                </h3>
+                <div class="setting-group">
+                    <label class="setting-label">背景透明度: <span id="opacityValue">95%</span></label>
+                    <input type="range" class="slider" id="opacitySlider" min="70" max="100" value="95">
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">文字对比度: <span id="contrastValue">100%</span></label>
+                    <input type="range" class="slider" id="contrastSlider" min="80" max="150" value="100">
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">模糊效果: <span id="blurValue">10px</span></label>
+                    <input type="range" class="slider" id="blurSlider" min="0" max="20" value="10">
+                </div>
+            </div>
+
+            <!-- 特殊模式 -->
+            <div class="control-section">
+                <h3 class="section-title">
+                    <span>⚙️</span>
+                    特殊模式
+                </h3>
+                <div class="setting-group">
+                    <label class="setting-label">护眼模式</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="eyeCareMode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">自动夜间模式</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="autoNightMode">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+                <div class="setting-group">
+                    <label class="setting-label">跟随系统主题</label>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="systemTheme">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <div class="preset-actions">
+            <button class="btn btn-primary" onclick="themeManager.savePreset()">保存当前主题</button>
+            <button class="btn btn-secondary" onclick="themeManager.resetToDefault()">重置为默认</button>
+            <button class="btn btn-secondary" onclick="themeManager.exportTheme()">导出主题</button>
+            <button class="btn btn-secondary" onclick="document.getElementById('importTheme').click()">导入主题</button>
+            <input type="file" id="importTheme" accept=".json" style="display: none;">
+        </div>
+
+        <div class="reading-preview">
+            <h3 class="preview-title">阅读预览区域</h3>
+            <div class="preview-content">
+                <p>这是一段用于预览主题效果的示例文本。通过调整不同的主题设置，您可以找到最适合自己的阅读环境。</p>
+                <p>良好的主题设计不仅能够保护视力，还能提升阅读的专注度和舒适感。无论是在明亮的白天还是昏暗的夜晚，合适的主题都能为您提供最佳的阅读体验。</p>
+                <p>The quick brown fox jumps over the lazy dog. This sentence demonstrates how English text appears with the current theme settings.</p>
+                <p>在数字化阅读时代，个性化的主题设置已经成为提升用户体验的重要因素。通过精心调配的色彩搭配和视觉效果，我们可以创造出既美观又实用的阅读环境。</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="notification" id="notification"></div>
+
+    <script>
+        class ThemeManager {
+            constructor() {
+                this.currentTheme = localStorage.getItem('currentTheme') || 'light';
+                this.customSettings = JSON.parse(localStorage.getItem('themeSettings') || '{}');
+                this.savedPresets = JSON.parse(localStorage.getItem('savedPresets') || '[]');
+                this.init();
+            }
+
+            init() {
+                this.setupEventListeners();
+                this.loadSavedSettings();
+                this.applyTheme(this.currentTheme);
+                this.setupAutoNightMode();
+                this.setupSystemThemeDetection();
+            }
+
+            setupEventListeners() {
+                // 主题卡片点击
+                document.querySelectorAll('.theme-card').forEach(card => {
+                    card.addEventListener('click', () => {
+                        const theme = card.dataset.theme;
+                        this.applyTheme(theme);
+                    });
+                });
+
+                // 背景选项点击
+                document.querySelectorAll('.bg-option').forEach(option => {
+                    option.addEventListener('click', () => {
+                        this.applyBackground(option.dataset.bg, option.style.background);
+                    });
+                });
+
+                // 自定义背景上传
+                const bgUpload = document.getElementById('bgUpload');
+                const bgFile = document.getElementById('bgFile');
+                
+                bgUpload.addEventListener('click', () => bgFile.click());
+                bgFile.addEventListener('change', (e) => this.handleBackgroundUpload(e));
+
+                // 滑块控制
+                this.setupSliders();
+
+                // 开关控制
+                this.setupToggles();
+
+                // 主题导入
+                document.getElementById('importTheme').addEventListener('change', (e) => {
+                    this.importTheme(e);
+                });
+            }
+
+            setupSliders() {
+                const opacitySlider = document.getElementById('opacitySlider');
+                const contrastSlider = document.getElementById('contrastSlider');
+                const blurSlider = document.getElementById('blurSlider');
+
+                opacitySlider.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    document.getElementById('opacityValue').textContent = value + '%';
+                    this.updateContainerOpacity(value);
+                });
+
+                contrastSlider.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    document.getElementById('contrastValue').textContent = value + '%';
+                    this.updateTextContrast(value);
+                });
+
+                blurSlider.addEventListener('input', (e) => {
+                    const value = e.target.value;
+                    document.getElementById('blurValue').textContent = value + 'px';
+                    this.updateBackgroundBlur(value);
+                });
+            }
+
+            setupToggles() {
+                const eyeCareMode = document.getElementById('eyeCareMode');
+                const autoNightMode = document.getElementById('autoNightMode');
+                const systemTheme = document.getElementById('systemTheme');
+
+                eyeCareMode.addEventListener('change', (e) => {
+                    this.toggleEyeCareMode(e.target.checked);
+                });
+
+                autoNightMode.addEventListener('change', (e) => {
+                    this.toggleAutoNightMode(e.target.checked);
+                });
+
+                systemTheme.addEventListener('change', (e) => {
+                    this.toggleSystemTheme(e.target.checked);
+                });
+            }
+
+            applyTheme(themeName) {
+                // 移除所有主题类
+                document.body.className = document.body.className.replace(/\b\w+-theme\b/g, '');
+                
+                // 应用新主题
+                if (themeName !== 'light') {
+                    document.body.classList.add(themeName + '-theme');
+                }
+
+                // 更新活跃状态
+                document.querySelectorAll('.theme-card').forEach(card => {
+                    card.classList.remove('active');
+                    if (card.dataset.theme === themeName) {
+                        card.classList.add('active');
+                    }
+                });
+
+                this.currentTheme = themeName;
+                localStorage.setItem('currentTheme', themeName);
+                this.showNotification(`已切换到${this.getThemeName(themeName)}`);
+            }
+
+            applyBackground(bgType, bgStyle) {
+                if (bgType.startsWith('gradient')) {
+                    document.body.style.background = bgStyle;
+                    document.body.classList.add('custom-bg');
+                } else {
+                    document.body.style.backgroundImage = `url(${bgStyle})`;
+                    document.body.classList.add('custom-bg');
+                }
+
+                // 更新活跃状态
+                document.querySelectorAll('.bg-option').forEach(option => {
+                    option.classList.remove('active');
+                });
+                document.querySelector(`[data-bg="${bgType}"]`).classList.add('active');
+
+                localStorage.setItem('customBackground', JSON.stringify({ type: bgType, style: bgStyle }));
+            }
+
+            handleBackgroundUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const imageUrl = e.target.result;
+                    document.body.style.backgroundImage = `url(${imageUrl})`;
+                    document.body.classList.add('custom-bg');
+                    
+                    localStorage.setItem('customBackground', JSON.stringify({ 
+                        type: 'custom', 
+                        style: imageUrl 
+                    }));
+                    
+                    this.showNotification('自定义背景已应用');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            updateContainerOpacity(value) {
+                const containers = document.querySelectorAll('.container, .control-section, .reading-preview');
+                containers.forEach(container => {
+                    container.style.background = container.style.background.replace(
+                        /rgba?\([^)]+\)/g, 
+                        `rgba(255, 255, 255, ${value / 100})`
+                    );
+                });
+                this.customSettings.opacity = value;
+                this.saveSettings();
+            }
+
+            updateTextContrast(value) {
+                document.documentElement.style.setProperty('--text-opacity', value / 100);
+                this.customSettings.contrast = value;
+                this.saveSettings();
+            }
+
+            updateBackgroundBlur(value) {
+                const containers = document.querySelectorAll('.container');
+                containers.forEach(container => {
+                    container.style.backdropFilter = `blur(${value}px)`;
+                });
+                this.customSettings.blur = value;
+                this.saveSettings();
+            }
+
+            toggleEyeCareMode(enabled) {
+                if (enabled) {
+                    document.body.classList.add('eye-care-theme');
+                    this.showNotification('护眼模式已开启');
+                } else {
+                    document.body.classList.remove('eye-care-theme');
+                    this.showNotification('护眼模式已关闭');
+                }
+                this.customSettings.eyeCare = enabled;
+                this.saveSettings();
+            }
+
+            toggleAutoNightMode(enabled) {
+                this.customSettings.autoNight = enabled;
+                this.saveSettings();
+                
+                if (enabled) {
+                    this.setupAutoNightMode();
+                    this.showNotification('自动夜间模式已开启');
+                } else {
+                    this.showNotification('自动夜间模式已关闭');
+                }
+            }
+
+            toggleSystemTheme(enabled) {
+                this.customSettings.systemTheme = enabled;
+                this.saveSettings();
+                
+                if (enabled) {
+                    this.followSystemTheme();
+                    this.showNotification('已开启跟随系统主题');
+                } else {
+                    this.showNotification('已关闭跟随系统主题');
+                }
+            }
+
+            setupAutoNightMode() {
+                if (!this.customSettings.autoNight) return;
+                
+                const now = new Date();
+                const hour = now.getHours();
+                
+                // 18:00-6:00 自动切换夜间模式
+                if (hour >= 18 || hour < 6) {
+                    this.applyTheme('dark');
+                } else {
+                    this.applyTheme('light');
+                }
+            }
+
+            setupSystemThemeDetection() {
+                if (!this.customSettings.systemTheme) return;
+                
+                const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                mediaQuery.addListener((e) => {
+                    if (this.customSettings.systemTheme) {
+                        this.applyTheme(e.matches ? 'dark' : 'light');
+                    }
+                });
+                
+                // 初始检测
+                this.followSystemTheme();
+            }
+
+            followSystemTheme() {
+                const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                this.applyTheme(isDarkMode ? 'dark' : 'light');
+            }
+
+            savePreset() {
+                const presetName = prompt('请输入预设名称:');
+                if (!presetName) return;
+                
+                const preset = {
+                    name: presetName,
+                    theme: this.currentTheme,
+                    settings: { ...this.customSettings },
+                    background: localStorage.getItem('customBackground'),
+                    timestamp: Date.now()
+                };
+                
+                this.savedPresets.push(preset);
+                localStorage.setItem('savedPresets', JSON.stringify(this.savedPresets));
+                this.showNotification(`预设 "${presetName}" 已保存`);
+            }
+
+            resetToDefault() {
+                if (confirm('确定要重置为默认主题吗？')) {
+                    this.applyTheme('light');
+                    document.body.classList.remove('custom-bg');
+                    document.body.style.background = '';
+                    document.body.style.backgroundImage = '';
+                    
+                    // 重置滑块
+                    document.getElementById('opacitySlider').value = 95;
+                    document.getElementById('contrastSlider').value = 100;
+                    document.getElementById('blurSlider').value = 10;
+                    
+                    // 重置开关
+                    document.getElementById('eyeCareMode').checked = false;
+                    document.getElementById('autoNightMode').checked = false;
+                    document.getElementById('systemTheme').checked = false;
+                    
+                    this.customSettings = {};
+                    this.saveSettings();
+                    this.showNotification('已重置为默认主题');
+                }
+            }
+
+            exportTheme() {
+                const themeData = {
+                    theme: this.currentTheme,
+                    settings: this.customSettings,
+                    background: localStorage.getItem('customBackground'),
+                    version: '1.0',
+                    exportTime: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(themeData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `theme-${Date.now()}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('主题已导出');
+            }
+
+            importTheme(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    try {
+                        const themeData = JSON.parse(e.target.result);
+                        
+                        // 应用导入的主题
+                        this.applyTheme(themeData.theme);
+                        this.customSettings = themeData.settings || {};
+                        
+                        if (themeData.background) {
+                            const bg = JSON.parse(themeData.background);
+                            this.applyBackground(bg.type, bg.style);
+                        }
+                        
+                        this.loadSavedSettings();
+                        this.showNotification('主题导入成功');
+                    } catch (error) {
+                        this.showNotification('主题文件格式错误', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            }
+
+            loadSavedSettings() {
+                // 加载滑块设置
+                if (this.customSettings.opacity) {
+                    document.getElementById('opacitySlider').value = this.customSettings.opacity;
+                    this.updateContainerOpacity(this.customSettings.opacity);
+                }
+                
+                if (this.customSettings.contrast) {
+                    document.getElementById('contrastSlider').value = this.customSettings.contrast;
+                    this.updateTextContrast(this.customSettings.contrast);
+                }
+                
+                if (this.customSettings.blur) {
+                    document.getElementById('blurSlider').value = this.customSettings.blur;
+                    this.updateBackgroundBlur(this.customSettings.blur);
+                }
+                
+                // 加载开关设置
+                document.getElementById('eyeCareMode').checked = this.customSettings.eyeCare || false;
+                document.getElementById('autoNightMode').checked = this.customSettings.autoNight || false;
+                document.getElementById('systemTheme').checked = this.customSettings.systemTheme || false;
+                
+                // 加载背景设置
+                const savedBg = localStorage.getItem('customBackground');
+                if (savedBg) {
+                    const bg = JSON.parse(savedBg);
+                    this.applyBackground(bg.type, bg.style);
+                }
+            }
+
+            saveSettings() {
+                localStorage.setItem('themeSettings', JSON.stringify(this.customSettings));
+            }
+
+            getThemeName(theme) {
+                const names = {
+                    light: '明亮模式',
+                    dark: '夜间模式',
+                    sepia: '护眼模式',
+                    green: '清新绿',
+                    blue: '海洋蓝',
+                    purple: '优雅紫'
+                };
+                return names[theme] || theme;
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.getElementById('notification');
+                notification.textContent = message;
+                notification.className = `notification ${type}`;
+                notification.classList.add('show');
+                
+                setTimeout(() => {
+                    notification.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // 初始化主题管理器
+        const themeManager = new ThemeManager();
+    </script>
+</body>
+</html>
