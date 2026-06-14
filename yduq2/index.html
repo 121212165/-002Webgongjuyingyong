@@ -130,8 +130,76 @@
     <script src="epub.js"></script>
     <script src="reader.js"></script>
     <script src="indexeddb.js"></script>
-    <script src="app.js"></script>
-    <script src="test-script.js"></script>
-    <script src="performance-test.js"></script>
+    <script>
+    class ReaderApp {
+        constructor() { this.reader = new Reader(); this.recentBooks = []; this.library = []; this.init(); }
+        async init() { this.bindEvents(); this.loadRecentBooks(); await this.loadLibrary(); this.renderLibrary(); this.renderRecentBooks(); }
+        bindEvents() {
+            document.getElementById('fileInput').addEventListener('change', e => this.handleFileSelect(e));
+            document.getElementById('directoryInput').addEventListener('change', e => this.handleDirectorySelect(e));
+            const dragArea = document.getElementById('dragArea');
+            dragArea.addEventListener('dragover', e => { e.preventDefault(); dragArea.classList.add('dragover'); });
+            dragArea.addEventListener('dragleave', () => dragArea.classList.remove('dragover'));
+            dragArea.addEventListener('drop', e => { e.preventDefault(); dragArea.classList.remove('dragover'); if (e.dataTransfer.files.length) this.processFile(e.dataTransfer.files[0]); });
+            document.getElementById('scanDirectoryBtn')?.addEventListener('click', () => document.getElementById('directoryInput').click());
+            document.getElementById('searchInput')?.addEventListener('input', e => this.renderLibrary(e.target.value));
+            document.getElementById('sortSelect')?.addEventListener('change', e => this.renderLibrary('', e.target.value));
+            document.getElementById('backBtn')?.addEventListener('click', () => this.goBack());
+            document.getElementById('menuBtn')?.addEventListener('click', () => this.reader.showSidebar('toc'));
+            document.getElementById('bookmarkBtn')?.addEventListener('click', () => { this.reader.toggleBookmark(); document.getElementById('bookmarkBtn').classList.toggle('active'); });
+            document.getElementById('prevBtn')?.addEventListener('click', () => this.reader.prevChapter());
+            document.getElementById('nextBtn')?.addEventListener('click', () => this.reader.nextChapter());
+            document.getElementById('settingsBtn')?.addEventListener('click', () => this.reader.showSettings());
+            document.getElementById('closeSidebar')?.addEventListener('click', () => this.reader.closeSidebar());
+            document.getElementById('overlay')?.addEventListener('click', () => this.reader.closeSidebar());
+            document.getElementById('closeSettings')?.addEventListener('click', () => this.reader.closeSettings());
+            document.getElementById('dayMode')?.addEventListener('click', () => this.reader.toggleTheme('day'));
+            document.getElementById('nightMode')?.addEventListener('click', () => this.reader.toggleTheme('night'));
+            document.getElementById('decreaseFont')?.addEventListener('click', () => this.reader.adjustFontSize(-1));
+            document.getElementById('increaseFont')?.addEventListener('click', () => this.reader.adjustFontSize(1));
+        }
+        async handleFileSelect(e) { if (e.target.files[0]) await this.processFile(e.target.files[0]); }
+        async handleDirectorySelect(e) {
+            const files = Array.from(e.target.files).filter(f => ['.txt','.epub','.pdf','.mobi','.azw','.azw3'].includes('.' + f.name.split('.').pop().toLowerCase()));
+            for (const f of files) await this.processFile(f, false);
+            this.showToast(`处理完成 ${files.length} 个文件`);
+        }
+        async processFile(file, switchToReader = true) {
+            try {
+                document.getElementById('readerContent').innerHTML = '<div style="text-align:center;padding:2rem">加载中...</div>';
+                const parser = FileParserFactory.getParser(file);
+                const bookData = await parser.parse(file);
+                this.addToLibrary(bookData, file);
+                this.addToRecentBooks(bookData.title, file.name);
+                if (switchToReader) { this.switchToReader(); this.reader.init(); await this.reader.loadBook(bookData); }
+                this.renderLibrary(); this.renderRecentBooks();
+            } catch (err) { console.error(err); this.showToast('文件处理失败'); }
+        }
+        addToLibrary(bookData, file) {
+            if (!this.library.find(b => b.title === bookData.title)) {
+                this.library.push({ id: Date.now(), title: bookData.title, author: bookData.author || '未知作者', fileName: file.name, fileSize: file.size, fileType: file.name.split('.').pop().toLowerCase(), addedDate: new Date().toISOString() });
+                localStorage.setItem('bookLibrary', JSON.stringify(this.library));
+            }
+        }
+        loadLibrary() { try { this.library = JSON.parse(localStorage.getItem('bookLibrary') || '[]'); } catch { this.library = []; } }
+        renderLibrary(search = '', sort = 'title') {
+            const el = document.getElementById('bookLibrary'); if (!el) return;
+            let books = search ? this.library.filter(b => b.title.toLowerCase().includes(search)) : [...this.library];
+            books.sort((a, b) => sort === 'date' ? new Date(b.addedDate) - new Date(a.addedDate) : (a[sort] || '').localeCompare(b[sort] || ''));
+            el.innerHTML = books.length ? books.map(b => `<div class="book-item" data-id="${b.id}"><div class="book-cover"></div><h3>${b.title}</h3><p class="book-meta"><small>${b.author}</small><br><small>${new Date(b.addedDate).toLocaleDateString()}</small></p></div>`).join('') : '<div style="text-align:center;color:#999;padding:2rem">暂无书籍</div>';
+            el.querySelectorAll('.book-item').forEach(item => item.addEventListener('click', () => this.showToast('请重新选择文件以打开书籍')));
+        }
+        addToRecentBooks(title, fileName) { this.recentBooks = this.recentBooks.filter(b => b.title !== title); this.recentBooks.unshift({ title, fileName, lastRead: new Date().toISOString() }); if (this.recentBooks.length > 10) this.recentBooks.pop(); localStorage.setItem('recentBooks', JSON.stringify(this.recentBooks)); }
+        loadRecentBooks() { try { this.recentBooks = JSON.parse(localStorage.getItem('recentBooks') || '[]'); } catch { this.recentBooks = []; } }
+        renderRecentBooks() {
+            const el = document.getElementById('bookList'); if (!el) return;
+            el.innerHTML = this.recentBooks.length ? this.recentBooks.map(b => `<div class="book-item" data-title="${b.title}"><h3>${b.title}</h3><p class="book-meta"><small>${b.fileName}</small><br><small>${new Date(b.lastRead).toLocaleString()}</small></p></div>`).join('') : '<p style="text-align:center;color:#999;margin-top:1rem">暂无阅读记录</p>';
+        }
+        switchToReader() { document.getElementById('importPage').style.display = 'none'; document.getElementById('readerPage').style.display = 'block'; }
+        goBack() { this.reader.saveProgress(); this.reader.stopReadingTimer(); document.getElementById('importPage').style.display = 'block'; document.getElementById('readerPage').style.display = 'none'; this.loadRecentBooks(); this.renderRecentBooks(); }
+        showToast(msg) { let t = document.querySelector('.toast'); if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); } t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+    }
+    document.addEventListener('DOMContentLoaded', () => new ReaderApp());
+    </script>
 </body>
 </html>

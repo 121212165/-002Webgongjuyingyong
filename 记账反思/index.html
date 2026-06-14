@@ -1,13 +1,233 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>记账反思</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.ts"></script>
-  </body>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; color: #333; max-width: 600px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: #4a90e2; color: white; padding: 1rem; text-align: center; }
+        header h1 { font-size: 1.5rem; font-weight: 600; }
+        main { flex: 1; padding: 1rem; }
+        .page { display: none; }
+        .page.active { display: block; }
+        .card { background: white; border-radius: 8px; padding: 1rem; margin-bottom: 1rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card h2 { font-size: 1.1rem; margin-bottom: 0.75rem; color: #333; }
+        .form-group { margin-bottom: 1rem; }
+        .form-group label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; }
+        .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        .form-group textarea { resize: vertical; min-height: 80px; }
+        .btn { padding: 0.7rem 1.5rem; border: none; border-radius: 8px; font-size: 1rem; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background: #4a90e2; color: white; width: 100%; }
+        .btn-primary:hover { background: #357abd; }
+        .btn-danger { background: #e74c3c; color: white; font-size: 0.8rem; padding: 0.3rem 0.6rem; }
+        .btn-danger:hover { background: #c0392b; }
+        .expense-item { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid #f0f0f0; }
+        .expense-item:last-child { border-bottom: none; }
+        .expense-info h3 { font-size: 1rem; margin-bottom: 0.2rem; }
+        .expense-info p { font-size: 0.8rem; color: #999; }
+        .expense-amount { font-size: 1.1rem; font-weight: 600; color: #e74c3c; white-space: nowrap; }
+        .expense-amount.income { color: #27ae60; }
+        .summary { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .summary-card { flex: 1; background: white; border-radius: 8px; padding: 1rem; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .summary-card .amount { font-size: 1.4rem; font-weight: 700; }
+        .summary-card .label { font-size: 0.8rem; color: #999; margin-top: 0.25rem; }
+        .summary-card .amount.expense { color: #e74c3c; }
+        .summary-card .amount.income { color: #27ae60; }
+        .summary-card .amount.balance { color: #4a90e2; }
+        canvas { width: 100%; height: 200px; margin: 1rem 0; }
+        .reflection-item { background: #fff9e6; border-left: 3px solid #f39c12; padding: 0.75rem; margin-bottom: 0.75rem; border-radius: 0 6px 6px 0; }
+        .reflection-item p { font-size: 0.9rem; line-height: 1.5; }
+        .reflection-item .date { font-size: 0.75rem; color: #999; margin-top: 0.5rem; }
+        .category-tag { display: inline-block; font-size: 0.7rem; padding: 0.15rem 0.5rem; background: #e8f4fd; color: #4a90e2; border-radius: 10px; margin-top: 0.25rem; }
+        .empty-state { text-align: center; padding: 2rem; color: #999; }
+        footer { background: white; border-top: 1px solid #e0e0e0; padding: 0.75rem; }
+        .bottom-nav { display: flex; justify-content: space-around; align-items: center; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; color: #666; font-size: 0.75rem; cursor: pointer; padding: 0.3rem 0.8rem; border-radius: 8px; background: none; border: none; }
+        .nav-item:hover { background: #f0f0f0; }
+        .nav-item.active { color: #4a90e2; }
+        .nav-item .icon { font-size: 1.3rem; margin-bottom: 0.15rem; }
+        .nav-item.add { width: 46px; height: 46px; border-radius: 50%; background: #4a90e2; color: white; font-size: 1.5rem; justify-content: center; transform: translateY(-10px); box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .nav-item.add:hover { background: #357abd; }
+        .stat-row { display: flex; justify-content: space-between; padding: 0.5rem 0; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-label { color: #666; }
+        .stat-value { font-weight: 600; }
+    </style>
+</head>
+<body>
+    <header><h1>记账反思</h1></header>
+    <main>
+        <div id="page-home" class="page active">
+            <div class="summary">
+                <div class="summary-card"><div class="amount expense" id="totalExpense">¥0</div><div class="label">本月支出</div></div>
+                <div class="summary-card"><div class="amount income" id="totalIncome">¥0</div><div class="label">本月收入</div></div>
+                <div class="summary-card"><div class="amount balance" id="balance">¥0</div><div class="label">结余</div></div>
+            </div>
+            <div class="card">
+                <h2>支出趋势（近7天）</h2>
+                <canvas id="trendChart"></canvas>
+            </div>
+            <div class="card">
+                <h2>最近记录</h2>
+                <div id="recentList"></div>
+            </div>
+        </div>
+        <div id="page-add" class="page">
+            <div class="card">
+                <h2>添加记录</h2>
+                <div class="form-group"><label>类型</label><select id="type"><option value="expense">支出</option><option value="income">收入</option></select></div>
+                <div class="form-group"><label>金额</label><input type="number" id="amount" placeholder="0.00" step="0.01" min="0"></div>
+                <div class="form-group"><label>分类</label><select id="category"><option>餐饮</option><option>交通</option><option>购物</option><option>娱乐</option><option>医疗</option><option>教育</option><option>住房</option><option>工资</option><option>其他</option></select></div>
+                <div class="form-group"><label>备注</label><input type="text" id="note" placeholder="选填"></div>
+                <div class="form-group"><label>日期</label><input type="date" id="date"></div>
+                <button class="btn btn-primary" onclick="addRecord()">保存</button>
+            </div>
+        </div>
+        <div id="page-reflection" class="page">
+            <div class="card">
+                <h2>消费反思</h2>
+                <div class="form-group"><textarea id="reflectionText" placeholder="写下你的消费反思..."></textarea></div>
+                <button class="btn btn-primary" onclick="addReflection()" style="margin-bottom:1rem">记录反思</button>
+                <div id="reflectionList"></div>
+            </div>
+        </div>
+        <div id="page-analytics" class="page">
+            <div class="card"><h2>本月统计</h2><div id="analyticsContent"></div></div>
+            <div class="card"><h2>分类占比</h2><canvas id="pieChart"></canvas></div>
+        </div>
+        <div id="page-settings" class="page">
+            <div class="card"><h2>设置</h2>
+                <div class="form-group"><label>月预算</label><input type="number" id="budget" placeholder="5000" step="100"></div>
+                <button class="btn btn-primary" onclick="saveBudget()">保存预算</button>
+                <button class="btn btn-danger" style="margin-top:1rem;width:100%" onclick="clearAll()">清除所有数据</button>
+            </div>
+        </div>
+    </main>
+    <footer>
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="home"><span class="icon">📊</span>首页</button>
+            <button class="nav-item" data-page="reflection"><span class="icon">💭</span>反思</button>
+            <button class="nav-item add" data-page="add"><span class="icon">+</span></button>
+            <button class="nav-item" data-page="analytics"><span class="icon">📈</span>统计</button>
+            <button class="nav-item" data-page="settings"><span class="icon">⚙️</span>设置</button>
+        </nav>
+    </footer>
+<script>
+const STORE='expense_records',REFLECT_STORE='reflections',BUDGET_STORE='budget';
+const getRecords=()=>JSON.parse(localStorage.getItem(STORE)||'[]');
+const saveRecords=r=>localStorage.setItem(STORE,JSON.stringify(r));
+const getReflections=()=>JSON.parse(localStorage.getItem(REFLECT_STORE)||'[]');
+const saveReflections=r=>localStorage.setItem(REFLECT_STORE,JSON.stringify(r));
+const fmt=n=>'¥'+Number(n).toFixed(2);
+
+function addRecord(){
+    const amount=parseFloat(document.getElementById('amount').value);
+    if(!amount||amount<=0)return alert('请输入有效金额');
+    const r=getRecords();
+    r.push({id:Date.now(),type:document.getElementById('type').value,amount,category:document.getElementById('category').value,note:document.getElementById('note').value,date:document.getElementById('date').value||new Date().toISOString().slice(0,10)});
+    saveRecords(r);document.getElementById('amount').value='';document.getElementById('note').value='';
+    showPage('home');
+}
+
+function addReflection(){
+    const text=document.getElementById('reflectionText').value.trim();
+    if(!text)return;
+    const r=getReflections();r.push({id:Date.now(),text,date:new Date().toLocaleString('zh-CN')});
+    saveReflections(r);document.getElementById('reflectionText').value='';renderReflections();
+}
+
+function deleteRecord(id){
+    if(!confirm('确定删除？'))return;
+    saveRecords(getRecords().filter(r=>r.id!==id));renderHome();
+}
+
+function renderHome(){
+    const now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    const recs=getRecords().filter(r=>r.date&&r.date.startsWith(ym));
+    const exp=recs.filter(r=>r.type==='expense').reduce((s,r)=>s+r.amount,0);
+    const inc=recs.filter(r=>r.type==='income').reduce((s,r)=>s+r.amount,0);
+    document.getElementById('totalExpense').textContent=fmt(exp);
+    document.getElementById('totalIncome').textContent=fmt(inc);
+    document.getElementById('balance').textContent=fmt(inc-exp);
+    const recent=getRecords().slice(-10).reverse();
+    document.getElementById('recentList').innerHTML=recent.length?recent.map(r=>`<div class="expense-item"><div class="expense-info"><h3>${r.category}${r.note?' - '+r.note:''}</h3><p>${r.date}</p></div><div style="display:flex;align-items:center;gap:0.5rem"><span class="expense-amount ${r.type==='income'?'income':''}">${r.type==='expense'?'-':'+'}${fmt(r.amount)}</span><button class="btn btn-danger" onclick="deleteRecord(${r.id})">×</button></div></div>`).join(''):'<div class="empty-state">暂无记录</div>';
+    drawTrend();
+}
+
+function renderReflections(){
+    const r=getReflections().reverse();
+    document.getElementById('reflectionList').innerHTML=r.length?r.map(r=>`<div class="reflection-item"><p>${r.text}</p><div class="date">${r.date}</div></div>`).join(''):'<div class="empty-state">暂无反思记录</div>';
+}
+
+function renderAnalytics(){
+    const now=new Date(),ym=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0');
+    const recs=getRecords().filter(r=>r.date&&r.date.startsWith(ym)&&r.type==='expense');
+    const cats={};recs.forEach(r=>{cats[r.category]=(cats[r.category]||0)+r.amount;});
+    const budget=parseFloat(localStorage.getItem(BUDGET_STORE)||'0');
+    const total=recs.reduce((s,r)=>s+r.amount,0);
+    let html=`<div class="stat-row"><span class="stat-label">总支出</span><span class="stat-value">${fmt(total)}</span></div>`;
+    if(budget)html+=`<div class="stat-row"><span class="stat-label">预算</span><span class="stat-value">${fmt(budget)}</span></div><div class="stat-row"><span class="stat-label">剩余预算</span><span class="stat-value">${fmt(budget-total)}</span></div>`;
+    html+=`<div class="stat-row"><span class="stat-label">记录数</span><span class="stat-value">${recs.length}</span></div>`;
+    Object.entries(cats).sort((a,b)=>b[1]-a[1]).forEach(([cat,amt])=>{html+=`<div class="stat-row"><span class="stat-label">${cat}</span><span class="stat-value">${fmt(amt)}</span></div>`;});
+    document.getElementById('analyticsContent').innerHTML=html;
+    drawPie(cats);
+}
+
+function drawTrend(){
+    const canvas=document.getElementById('trendChart');const ctx=canvas.getContext('2d');
+    canvas.width=canvas.offsetWidth*2;canvas.height=400;ctx.scale(2,2);
+    const w=canvas.offsetWidth,h=200,pad=40;
+    const days=[];for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.toISOString().slice(0,10));}
+    const recs=getRecords();
+    const vals=days.map(d=>recs.filter(r=>r.date===d&&r.type==='expense').reduce((s,r)=>s+r.amount,0));
+    const max=Math.max(...vals,1);
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle='#e0e0e0';ctx.lineWidth=0.5;
+    for(let i=0;i<=4;i++){const y=pad+(h-2*pad)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();}
+    ctx.strokeStyle='#4a90e2';ctx.lineWidth=2;ctx.beginPath();
+    vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=pad+(h-2*pad)*(1-v/max);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);});ctx.stroke();
+    vals.forEach((v,i)=>{const x=pad+i*(w-2*pad)/6,y=pad+(h-2*pad)*(1-v/max);
+        ctx.fillStyle='#4a90e2';ctx.beginPath();ctx.arc(x,y,4,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#666';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(days[i].slice(5),x,h-pad+15);
+        if(v>0){ctx.fillStyle='#333';ctx.fillText(v.toFixed(0),x,y-10);}
+    });
+}
+
+function drawPie(cats){
+    const canvas=document.getElementById('pieChart');const ctx=canvas.getContext('2d');
+    canvas.width=canvas.offsetWidth*2;canvas.height=400;ctx.scale(2,2);
+    const w=canvas.offsetWidth,h=200,cx=w/2,cy=h/2,r=70;
+    const entries=Object.entries(cats).sort((a,b)=>b[1]-a[1]);
+    const total=entries.reduce((s,[,v])=>s+v,0);if(!total)return;
+    const colors=['#4a90e2','#e74c3c','#27ae60','#f39c12','#9b59b6','#1abc9c','#e67e22','#34495e'];
+    let angle=-Math.PI/2;
+    entries.forEach(([cat,amt],i)=>{
+        const slice=amt/total*Math.PI*2;
+        ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle,angle+slice);ctx.closePath();
+        ctx.fillStyle=colors[i%colors.length];ctx.fill();
+        const mid=angle+slice/2;const lx=cx+(r+20)*Math.cos(mid),ly=cy+(r+20)*Math.sin(mid);
+        ctx.fillStyle='#333';ctx.font='11px sans-serif';ctx.textAlign='center';
+        ctx.fillText(cat+' '+Math.round(amt/total*100)+'%',lx,ly);
+        angle+=slice;
+    });
+}
+
+function showPage(name){
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===name));
+    if(name==='home')renderHome();if(name==='reflection')renderReflections();if(name==='analytics')renderAnalytics();
+}
+
+function saveBudget(){localStorage.setItem(BUDGET_STORE,document.getElementById('budget').value);alert('预算已保存');}
+function clearAll(){if(confirm('确定清除所有数据？')){localStorage.removeItem(STORE);localStorage.removeItem(REFLECT_STORE);localStorage.removeItem(BUDGET_STORE);renderHome();}}
+
+document.querySelectorAll('.nav-item').forEach(n=>n.addEventListener('click',()=>showPage(n.dataset.page)));
+document.getElementById('date').value=new Date().toISOString().slice(0,10);
+const budgetEl=document.getElementById('budget');budgetEl.value=localStorage.getItem(BUDGET_STORE)||'';
+renderHome();renderReflections();
+</script>
+</body>
 </html>

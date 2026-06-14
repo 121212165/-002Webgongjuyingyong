@@ -1,24 +1,222 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My Trae Project</title>
-    <script type="module">
-      if (import.meta.hot?.on) {
-        import.meta.hot.on('vite:error', (error) => {
-          if (error.err) {
-            console.error(
-              [error.err.message, error.err.frame].filter(Boolean).join('\n'),
-            )
-          }
-        })
-      }
-    </script>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健康管家</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:linear-gradient(135deg,#eff6ff,#ecfdf5);min-height:100vh;color:#1e293b}
+        header{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.1);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+        .logo{display:flex;align-items:center;gap:0.75rem}
+        .logo-icon{width:40px;height:40px;background:linear-gradient(135deg,#3b82f6,#10b981);border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem}
+        .logo h1{font-size:1.4rem;color:#1e293b}
+        .logo p{font-size:0.8rem;color:#64748b}
+        .alert-bar{max-width:900px;margin:1rem auto;padding:0.75rem 1rem;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;display:none;align-items:center;gap:0.75rem}
+        .alert-bar.show{display:flex}
+        .alert-badge{width:24px;height:24px;background:#ef4444;border-radius:50%;color:#fff;font-size:0.75rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+        .alert-bar button{margin-left:auto;background:#ef4444;color:#fff;border:none;padding:0.4rem 1rem;border-radius:6px;cursor:pointer;font-size:0.85rem}
+        main{max-width:900px;margin:0 auto;padding:1.5rem}
+        .menu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:1rem;margin-bottom:1.5rem}
+        .menu-card{background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e7eb;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:1rem}
+        .menu-card:hover{box-shadow:0 4px 12px rgba(0,0,0,0.1);transform:translateY(-2px)}
+        .menu-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.3rem;flex-shrink:0}
+        .menu-card h3{font-size:1rem;margin-bottom:0.15rem}
+        .menu-card p{font-size:0.8rem;color:#64748b}
+        .section-card{background:#fff;border-radius:12px;padding:1.25rem;border:1px solid #e5e7eb;margin-bottom:1.5rem}
+        .section-card h2{font-size:1.1rem;margin-bottom:1rem;display:flex;align-items:center;gap:0.5rem}
+        .section-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem}
+        .form-row{display:flex;gap:0.75rem;margin-bottom:0.75rem;flex-wrap:wrap}
+        .form-group{flex:1;min-width:120px}
+        .form-group label{display:block;font-size:0.8rem;color:#64748b;margin-bottom:0.25rem}
+        .form-group input,.form-group select{width:100%;padding:0.5rem;border:1px solid #d1d5db;border-radius:6px;font-size:0.9rem}
+        .form-group input:focus,.form-group select:focus{outline:none;border-color:#3b82f6;box-shadow:0 0 0 2px rgba(59,130,246,0.15)}
+        .btn{padding:0.6rem 1.2rem;border:none;border-radius:8px;font-size:0.9rem;cursor:pointer;transition:all 0.2s}
+        .btn-primary{background:#3b82f6;color:#fff;width:100%}
+        .btn-primary:hover{background:#2563eb}
+        .btn-danger{background:#ef4444;color:#fff;font-size:0.8rem;padding:0.3rem 0.6rem}
+        .btn-sm{font-size:0.8rem;padding:0.3rem 0.6rem;background:#f3f4f6;border:1px solid #d1d5db;border-radius:4px;cursor:pointer}
+        .data-table{width:100%;border-collapse:collapse;font-size:0.85rem}
+        .data-table th{text-align:left;padding:0.5rem;color:#64748b;font-weight:600;border-bottom:2px solid #e5e7eb}
+        .data-table td{padding:0.5rem;border-bottom:1px solid #f3f4f6}
+        .data-table tr:hover{background:#f8fafc}
+        .status-normal{color:#10b981;font-weight:600}
+        .status-warning{color:#f59e0b;font-weight:600}
+        .status-danger{color:#ef4444;font-weight:600}
+        .chart-container{width:100%;height:200px;margin:0.5rem 0}
+        canvas{width:100%;height:100%}
+        .modal-overlay{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center}
+        .modal-overlay.show{display:flex}
+        .modal{background:#fff;border-radius:12px;padding:1.5rem;width:90%;max-width:500px;max-height:80vh;overflow-y:auto}
+        .modal h2{margin-bottom:1rem;font-size:1.2rem}
+        .modal .close{float:right;background:none;border:none;font-size:1.5rem;cursor:pointer;color:#64748b}
+        .medicine-item{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid #f3f4f6}
+        .medicine-item:last-child{border-bottom:none}
+        .badge{display:inline-block;font-size:0.7rem;padding:0.15rem 0.5rem;border-radius:10px;background:#dbeafe;color:#1d4ed8}
+        .food-item{display:flex;justify-content:space-between;align-items:center;padding:0.6rem 0;border-bottom:1px solid #f3f4f6}
+        .food-item:last-child{border-bottom:none}
+        .quick-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:0.75rem;margin-bottom:1rem}
+        .stat-box{background:#f8fafc;border-radius:8px;padding:0.75rem;text-align:center}
+        .stat-box .val{font-size:1.3rem;font-weight:700}
+        .stat-box .lbl{font-size:0.75rem;color:#64748b;margin-top:0.2rem}
+        nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e7eb;box-shadow:0 -2px 10px rgba(0,0,0,0.05)}
+        nav ul{display:flex;justify-content:space-around;max-width:900px;margin:0 auto;padding:0.5rem 0;list-style:none}
+        nav li{display:flex;flex-direction:column;align-items:center;gap:0.15rem;font-size:0.7rem;color:#64748b;cursor:pointer;padding:0.3rem 0.8rem;border-radius:8px}
+        nav li:hover{background:#f3f4f6}
+        nav li .icon{font-size:1.2rem}
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><div class="logo-icon">❤</div><div><h1>健康管家</h1><p>老年人健康管理系统</p></div></div>
+    </header>
+    <div class="alert-bar" id="alertBar"><div class="alert-badge" id="alertCount">0</div><div><strong>健康异常提醒</strong><p style="font-size:0.8rem;color:#991b1b" id="alertText"></p></div><button onclick="showModal('abnormal')">查看详情</button></div>
+    <main>
+        <div class="menu-grid">
+            <div class="menu-card" onclick="showModal('health')"><div class="menu-icon" style="background:#ef4444">❤</div><div><h3>健康数据</h3><p>记录血压、血糖、睡眠</p></div></div>
+            <div class="menu-card" onclick="showModal('medication')"><div class="menu-icon" style="background:#10b981">💊</div><div><h3>用药管理</h3><p>管理用药计划和提醒</p></div></div>
+            <div class="menu-card" onclick="showModal('food')"><div class="menu-icon" style="background:#f97316">🍽</div><div><h3>饮食日记</h3><p>记录每日饮食情况</p></div></div>
+            <div class="menu-card" onclick="showModal('dashboard')"><div class="menu-icon" style="background:#3b82f6">📊</div><div><h3>数据仪表盘</h3><p>查看健康数据趋势</p></div></div>
+            <div class="menu-card" onclick="showModal('report')"><div class="menu-icon" style="background:#8b5cf6">📄</div><div><h3>月度报告</h3><p>生成健康总结报告</p></div></div>
+        </div>
+        <div class="section-card">
+            <h2><div class="section-icon" style="background:#f97316">📊</div>健康监测</h2>
+            <div id="monitoringContent"></div>
+        </div>
+        <div class="section-card">
+            <h2><div class="section-icon" style="background:#3b82f6">📊</div>数据概览</h2>
+            <div class="quick-stats" id="quickStats"></div>
+            <div class="chart-container"><canvas id="overviewChart"></canvas></div>
+        </div>
+    </main>
+    <div class="modal-overlay" id="modalOverlay" onclick="if(event.target===this)closeModal()">
+        <div class="modal" id="modalContent"></div>
+    </div>
+    <nav><ul>
+        <li onclick="showModal('health')"><span class="icon">❤</span>健康数据</li>
+        <li onclick="showModal('medication')"><span class="icon">💊</span>用药管理</li>
+        <li onclick="showModal('food')"><span class="icon">🍽</span>饮食日记</li>
+        <li onclick="showModal('dashboard')"><span class="icon">📊</span>仪表盘</li>
+    </ul></nav>
+<script>
+const DB='health_data';
+const getData=()=>JSON.parse(localStorage.getItem(DB)||'{"readings":[],"medications":[],"foods":[]}');
+const saveData=d=>localStorage.setItem(DB,JSON.stringify(d));
+
+function addReading(){
+    const bp=document.getElementById('bpInput').value;
+    const bs=parseFloat(document.getElementById('bsInput').value);
+    const sleep=parseFloat(document.getElementById('sleepInput').value);
+    const d=getData();
+    d.readings.push({id:Date.now(),date:new Date().toISOString().slice(0,10),bp,bs,sleep});
+    saveData(d);closeModal();renderAll();
+}
+
+function addMedication(){
+    const name=document.getElementById('medName').value.trim();
+    const dose=document.getElementById('medDose').value.trim();
+    const time=document.getElementById('medTime').value;
+    if(!name)return;
+    const d=getData();d.medications.push({id:Date.now(),name,dose,time});
+    saveData(d);closeModal();renderAll();
+}
+
+function addFood(){
+    const meal=document.getElementById('mealType').value;
+    const desc=document.getElementById('foodDesc').value.trim();
+    if(!desc)return;
+    const d=getData();d.foods.push({id:Date.now(),date:new Date().toISOString().slice(0,10),meal,desc});
+    saveData(d);closeModal();renderAll();
+}
+
+function deleteItem(type,id){
+    const d=getData();d[type]=d[type].filter(i=>i.id!==id);saveData(d);renderAll();
+}
+
+function getAbnormals(d){
+    const abn=[];
+    d.readings.forEach(r=>{
+        if(r.bp){const[s,dia]=r.bp.split('/').map(Number);if(s>140||dia>90)abn.push({text:`血压偏高: ${r.bp}`,date:r.date});}
+        if(r.bs&&(r.bs>7.0||r.bs<3.9))abn.push({text:`血糖异常: ${r.bs}mmol/L`,date:r.date});
+    });
+    return abn;
+}
+
+function renderAll(){
+    const d=getData();
+    const abn=getAbnormals(d);
+    const bar=document.getElementById('alertBar');
+    if(abn.length){bar.classList.add('show');document.getElementById('alertCount').textContent=abn.length;document.getElementById('alertText').textContent=`检测到${abn.length}个异常读数`;}
+    else{bar.classList.remove('show');}
+    renderMonitoring(d);
+    renderQuickStats(d);
+    renderChart(d);
+}
+
+function renderMonitoring(d){
+    const el=document.getElementById('monitoringContent');
+    const recent=d.readings.slice(-5).reverse();
+    if(!recent.length){el.innerHTML='<p style="color:#999;text-align:center;padding:1rem">暂无健康数据</p>';return;}
+    el.innerHTML='<table class="data-table"><thead><tr><th>日期</th><th>血压</th><th>血糖</th><th>睡眠</th><th>状态</th></tr></thead><tbody>'+recent.map(r=>{
+        let status='正常',cls='status-normal';
+        if(r.bp){const[s,dia]=r.bp.split('/').map(Number);if(s>140||dia>90){status='偏高';cls='status-danger';}else if(s>130||dia>85){status='偏高';cls='status-warning';}}
+        if(r.bs&&(r.bs>7.0)){status='异常';cls='status-danger';}else if(r.bs&&r.bs>6.1){status='偏高';cls='status-warning';}
+        return`<tr><td>${r.date}</td><td>${r.bp||'-'}</td><td>${r.bs?r.bs+' mmol/L':'-'}</td><td>${r.sleep?r.sleep+'h':'-'}</td><td class="${cls}">${status}</td></tr>`;
+    }).join('')+'</tbody></table>';
+}
+
+function renderQuickStats(d){
+    const el=document.getElementById('quickStats');
+    const recent=d.readings.slice(-7);
+    const avgBP=recent.filter(r=>r.bp).map(r=>{const[s]=r.bp.split('/').map(Number);return s;});
+    const avgBS=recent.filter(r=>r.bs).map(r=>r.bs);
+    const avgSleep=recent.filter(r=>r.sleep).map(r=>r.sleep);
+    const avg=l=>l.length?(l.reduce((a,b)=>a+b,0)/l.length).toFixed(1):'-';
+    el.innerHTML=`<div class="stat-box"><div class="val">${avg(avgBP)}</div><div class="lbl">平均收缩压</div></div><div class="stat-box"><div class="val">${avg(avgBS)}</div><div class="lbl">平均血糖(mmol/L)</div></div><div class="stat-box"><div class="val">${avg(avgSleep)}</div><div class="lbl">平均睡眠(h)</div></div><div class="stat-box"><div class="val">${d.readings.length}</div><div class="lbl">总记录数</div></div>`;
+}
+
+function renderChart(d){
+    const canvas=document.getElementById('overviewChart');if(!canvas)return;
+    const ctx=canvas.getContext('2d');canvas.width=canvas.offsetWidth*2;canvas.height=400;ctx.scale(2,2);
+    const w=canvas.offsetWidth,h=200,pad=40;
+    const recent=d.readings.slice(-14);
+    if(!recent.length)return;
+    const bps=recent.map(r=>r.bp?parseInt(r.bp.split('/')[0]):null);
+    const max=Math.max(...bps.filter(v=>v!==null),140);const min=Math.min(...bps.filter(v=>v!==null),60);
+    ctx.clearRect(0,0,w,h);
+    ctx.strokeStyle='#e5e7eb';ctx.lineWidth=0.5;
+    for(let i=0;i<=4;i++){const y=pad+(h-2*pad)*i/4;ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-pad,y);ctx.stroke();}
+    ctx.strokeStyle='#ef4444';ctx.lineWidth=2;ctx.beginPath();let started=false;
+    bps.forEach((v,i)=>{if(v===null)return;const x=pad+i*(w-2*pad)/Math.max(recent.length-1,1);const y=pad+(h-2*pad)*(1-(v-min)/(max-min));started?ctx.lineTo(x,y):ctx.moveTo(x,y);started=true;});ctx.stroke();
+    bps.forEach((v,i)=>{if(v===null)return;const x=pad+i*(w-2*pad)/Math.max(recent.length-1,1);const y=pad+(h-2*pad)*(1-(v-min)/(max-min));ctx.fillStyle='#ef4444';ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();});
+    ctx.fillStyle='#64748b';ctx.font='10px sans-serif';ctx.fillText('收缩压趋势',pad,15);
+}
+
+const MODALS={
+    health:()=>`<button class="close" onclick="closeModal()">×</button><h2>记录健康数据</h2>
+        <div class="form-group"><label>血压 (如 120/80)</label><input id="bpInput" placeholder="120/80"></div>
+        <div class="form-group"><label>血糖 (mmol/L)</label><input id="bsInput" type="number" step="0.1" placeholder="5.6"></div>
+        <div class="form-group"><label>睡眠时长 (小时)</label><input id="sleepInput" type="number" step="0.5" placeholder="7"></div>
+        <button class="btn btn-primary" onclick="addReading()">保存</button>`,
+    medication:()=>{const d=getData();return`<button class="close" onclick="closeModal()">×</button><h2>用药管理</h2>
+        <div class="form-group"><label>药品名称</label><input id="medName" placeholder="阿司匹林"></div>
+        <div class="form-group"><label>剂量</label><input id="medDose" placeholder="100mg"></div>
+        <div class="form-group"><label>服用时间</label><select id="medTime"><option>早餐后</option><option>午餐后</option><option>晚餐后</option><option>睡前</option></select></div>
+        <button class="btn btn-primary" onclick="addMedication()" style="margin-bottom:1rem">添加药品</button>
+        ${d.medications.length?'<h3 style="margin-bottom:0.5rem">当前用药</h3>'+d.medications.map(m=>`<div class="medicine-item"><div><strong>${m.name}</strong><br><span style="font-size:0.8rem;color:#666">${m.dose} · ${m.time}</span></div><button class="btn-danger" onclick="deleteItem('medications',${m.id})">删除</button></div>`).join(''):'<p style="color:#999">暂无用药记录</p>'}`;},
+    food:()=>{const d=getData();const today=d.foods.filter(f=>f.date===new Date().toISOString().slice(0,10));return`<button class="close" onclick="closeModal()">×</button><h2>饮食日记</h2>
+        <div class="form-group"><label>餐次</label><select id="mealType"><option>早餐</option><option>午餐</option><option>晚餐</option><option>加餐</option></select></div>
+        <div class="form-group"><label>饮食内容</label><input id="foodDesc" placeholder="牛奶、面包、鸡蛋"></div>
+        <button class="btn btn-primary" onclick="addFood()" style="margin-bottom:1rem">记录饮食</button>
+        ${today.length?'<h3 style="margin-bottom:0.5rem">今日饮食</h3>'+today.map(f=>`<div class="food-item"><div><span class="badge">${f.meal}</span> ${f.desc}</div><button class="btn-danger" onclick="deleteItem('foods',${f.id})">×</button></div>`).join(''):'<p style="color:#999">今日暂无饮食记录</p>'}`;},
+    dashboard:()=>{const d=getData();return`<button class="close" onclick="closeModal()">×</button><h2>数据仪表盘</h2><div class="quick-stats" style="margin:1rem 0"><div class="stat-box"><div class="val">${d.readings.length}</div><div class="lbl">健康记录</div></div><div class="stat-box"><div class="val">${d.medications.length}</div><div class="lbl">用药种类</div></div><div class="stat-box"><div class="val">${d.foods.length}</div><div class="lbl">饮食记录</div></div></div>`;},
+    report:()=>{const d=getData();const abn=getAbnormals(d);return`<button class="close" onclick="closeModal()">×</button><h2>月度报告</h2><div style="margin:1rem 0"><p>📊 本月共记录 <strong>${d.readings.length}</strong> 次健康数据</p><p>🍽 本月共记录 <strong>${d.foods.length}</strong> 次饮食</p><p>💊 当前使用 <strong>${d.medications.length}</strong> 种药物</p>${abn.length?`<p style="color:#ef4444">⚠ 发现 <strong>${abn.length}</strong> 次异常读数</p>':'<p style="color:#10b981">✅ 本月无异常读数</p>'}</div>`;},
+    abnormal:()=>{const d=getData();const abn=getAbnormals(d);return`<button class="close" onclick="closeModal()">×</button><h2>异常监测详情</h2>${abn.length?abn.map(a=>`<div style="padding:0.5rem 0;border-bottom:1px solid #f0f0f0"><span style="color:#ef4444;font-weight:600">${a.text}</span><br><span style="font-size:0.8rem;color:#999">${a.date}</span></div>`).join(''):'<p style="color:#10b981;text-align:center;padding:1rem">暂无异常</p>'}`;}
+};
+
+function showModal(name){document.getElementById('modalContent').innerHTML=MODALS[name]();document.getElementById('modalOverlay').classList.add('show');}
+function closeModal(){document.getElementById('modalOverlay').classList.remove('show');}
+renderAll();
+</script>
+</body>
 </html>

@@ -3,475 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>深度阅读器</title>
-    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <title>阅读器</title>
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --background-color: #ecf0f1;
-            --text-color: #2c3e50;
-            --border-color: #bdc3c7;
-            --hover-color: #34495e;
-            --success-color: #27ae60;
-            --warning-color: #f39c12;
-            --error-color: #e74c3c;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--background-color);
-            color: var(--text-color);
-            line-height: 1.6;
-            overflow: hidden;
-        }
-
-        .app-container {
-            display: flex;
-            height: 100vh;
-            flex-direction: column;
-        }
-
-        .header {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-size: 1.5rem;
-            font-weight: bold;
-        }
-
-        .header-controls {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .btn {
-            padding: 0.5rem 1rem;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn-primary {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #2980b9;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background-color: transparent;
-            color: white;
-            border: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(255,255,255,0.1);
-        }
-
-        .main-content {
-            display: flex;
-            flex: 1;
-            overflow: hidden;
-        }
-
-        .sidebar {
-            width: 300px;
-            background-color: white;
-            border-right: 1px solid var(--border-color);
-            display: flex;
-            flex-direction: column;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
-        }
-
-        .sidebar-header {
-            padding: 1rem;
-            border-bottom: 1px solid var(--border-color);
-            background-color: #f8f9fa;
-        }
-
-        .sidebar-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 1rem;
-        }
-
-        .file-list {
-            list-style: none;
-        }
-
-        .file-item {
-            padding: 0.75rem;
-            margin-bottom: 0.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            border: 1px solid transparent;
-        }
-
-        .file-item:hover {
-            background-color: #f8f9fa;
-            border-color: var(--border-color);
-        }
-
-        .file-item.active {
-            background-color: var(--secondary-color);
-            color: white;
-        }
-
-        .file-name {
-            font-weight: 500;
-            margin-bottom: 0.25rem;
-        }
-
-        .file-meta {
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-
-        .reading-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background-color: white;
-        }
-
-        .reading-header {
-            padding: 1rem 2rem;
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background-color: #f8f9fa;
-        }
-
-        .reading-controls {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-        }
-
-        .zoom-control {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .zoom-btn {
-            width: 30px;
-            height: 30px;
-            border: 1px solid var(--border-color);
-            background: white;
-            border-radius: 3px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .zoom-btn:hover {
-            background-color: var(--background-color);
-        }
-
-        .zoom-level {
-            min-width: 60px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .reading-content {
-            flex: 1;
-            overflow: auto;
-            padding: 2rem;
-            position: relative;
-        }
-
-        .welcome-screen {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100%;
-            text-align: center;
-            color: #7f8c8d;
-        }
-
-        .welcome-icon {
-            font-size: 4rem;
-            margin-bottom: 1rem;
-            opacity: 0.5;
-        }
-
-        .welcome-title {
-            font-size: 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .welcome-subtitle {
-            font-size: 1rem;
-            margin-bottom: 2rem;
-        }
-
-        .upload-zone {
-            border: 2px dashed var(--border-color);
-            border-radius: 10px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background-color: #f8f9fa;
-        }
-
-        .upload-zone:hover {
-            border-color: var(--secondary-color);
-            background-color: rgba(52, 152, 219, 0.05);
-        }
-
-        .upload-zone.dragover {
-            border-color: var(--secondary-color);
-            background-color: rgba(52, 152, 219, 0.1);
-        }
-
-        .status-bar {
-            padding: 0.5rem 2rem;
-            background-color: #f8f9fa;
-            border-top: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.9rem;
-            color: #7f8c8d;
-        }
-
-        .status-left, .status-right {
-            display: flex;
-            gap: 1rem;
-            align-items: center;
-        }
-
-        .loading {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .loading-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 10px;
-            text-align: center;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--secondary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 1rem 1.5rem;
-            border-radius: 5px;
-            color: white;
-            font-weight: 500;
-            z-index: 10000;
-            transform: translateX(400px);
-            transition: transform 0.3s ease;
-        }
-
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            background-color: var(--success-color);
-        }
-
-        .notification.error {
-            background-color: var(--error-color);
-        }
-
-        .notification.warning {
-            background-color: var(--warning-color);
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .sidebar {
-                width: 250px;
-            }
-            
-            .header {
-                padding: 0.75rem 1rem;
-            }
-            
-            .reading-content {
-                padding: 1rem;
-            }
-        }
+        :root{--primary:#2c3e50;--accent:#3498db;--bg:#ecf0f1;--text:#2c3e50;--border:#bdc3c7;--card:#fff}
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Segoe UI',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column;overflow:hidden}
+        header{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;padding:0.75rem 1.5rem;display:flex;justify-content:space-between;align-items:center}
+        header h1{font-size:1.3rem;display:flex;align-items:center;gap:0.5rem}
+        .header-btns{display:flex;gap:0.5rem}
+        .btn{padding:0.4rem 0.8rem;border:none;border-radius:5px;cursor:pointer;font-size:0.85rem;transition:all 0.2s}
+        .btn-white{background:rgba(255,255,255,0.2);color:#fff;border:1px solid rgba(255,255,255,0.3)}
+        .btn-white:hover{background:rgba(255,255,255,0.3)}
+        .btn-accent{background:var(--accent);color:#fff}
+        .btn-accent:hover{background:#2980b9}
+        .main{display:flex;flex:1;overflow:hidden}
+        .sidebar{width:260px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+        .sidebar-header{padding:0.75rem;border-bottom:1px solid var(--border);font-weight:600;background:#f8f9fa}
+        .file-list{flex:1;overflow-y:auto;padding:0.5rem}
+        .file-item{padding:0.6rem;border-radius:5px;cursor:pointer;margin-bottom:0.3rem;border:1px solid transparent;transition:all 0.2s}
+        .file-item:hover{background:#f8f9fa;border-color:var(--border)}
+        .file-item.active{background:var(--accent);color:#fff}
+        .file-name{font-weight:500;font-size:0.9rem}
+        .file-meta{font-size:0.75rem;opacity:0.7;margin-top:0.15rem}
+        .reading{flex:1;display:flex;flex-direction:column;overflow:hidden}
+        .reading-header{padding:0.6rem 1rem;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:#f8f9fa}
+        .reading-controls{display:flex;gap:0.4rem;align-items:center}
+        .zoom{display:flex;align-items:center;gap:0.3rem}
+        .zoom button{width:28px;height:28px;border:1px solid var(--border);background:#fff;border-radius:3px;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center}
+        .zoom button:hover{background:var(--bg)}
+        .zoom-level{min-width:45px;text-align:center;font-size:0.85rem}
+        .content{flex:1;overflow:auto;padding:1.5rem}
+        .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#7f8c8d;text-align:center}
+        .welcome-icon{font-size:3.5rem;margin-bottom:1rem;opacity:0.5}
+        .upload-zone{border:2px dashed var(--border);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:all 0.3s;background:#f8f9fa;margin-top:1rem}
+        .upload-zone:hover{border-color:var(--accent);background:rgba(52,152,219,0.05)}
+        .upload-zone.dragover{border-color:var(--accent);background:rgba(52,152,219,0.1)}
+        .text-content{line-height:1.8;font-size:16px;max-width:800px;margin:0 auto}
+        .text-content h1{font-size:1.8em;margin:1em 0 0.5em;border-bottom:2px solid #e0e0e0;padding-bottom:0.3em}
+        .text-content h2{font-size:1.4em;margin:1em 0 0.5em}
+        .text-content h3{font-size:1.2em;margin:1em 0 0.5em}
+        .text-content p{margin:0.8em 0}
+        .text-content code{background:#f4f4f4;padding:2px 6px;border-radius:3px;font-family:monospace;font-size:0.9em}
+        .text-content pre{background:#282c34;color:#abb2bf;padding:1rem;border-radius:8px;overflow-x:auto;margin:1em 0}
+        .text-content pre code{background:none;color:inherit;padding:0}
+        .text-content blockquote{border-left:4px solid var(--accent);padding:0.5rem 1rem;margin:1em 0;color:#666;background:#f8f9fa}
+        .text-content img{max-width:100%;height:auto}
+        .text-content table{width:100%;border-collapse:collapse;margin:1em 0}
+        .text-content th,.text-content td{border:1px solid #ddd;padding:8px 12px;text-align:left}
+        .text-content th{background:#f4f4f4}
+        .text-content a{color:var(--accent)}
+        .text-content hr{border:none;border-top:2px solid #e0e0e0;margin:2em 0}
+        .text-content ul,.text-content ol{padding-left:2em;margin:0.8em 0}
+        .status{padding:0.4rem 1rem;background:#f8f9fa;border-top:1px solid var(--border);display:flex;justify-content:space-between;font-size:0.8rem;color:#7f8c8d}
+        .loading{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;align-items:center;justify-content:center}
+        .loading.show{display:flex}
+        .loading-box{background:#fff;padding:1.5rem;border-radius:10px;text-align:center}
+        .spinner{width:30px;height:30px;border:3px solid #f3f3f3;border-top:3px solid var(--accent);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 0.75rem}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .notification{position:fixed;top:20px;right:20px;padding:0.75rem 1rem;border-radius:5px;color:#fff;font-weight:500;z-index:10000;transform:translateX(400px);transition:transform 0.3s}
+        .notification.show{transform:translateX(0)}
+        .notification.success{background:#27ae60}
+        .notification.error{background:#e74c3c}
+        .search-box{padding:0.5rem;border-bottom:1px solid var(--border)}
+        .search-box input{width:100%;padding:0.4rem;border:1px solid var(--border);border-radius:4px;font-size:0.85rem}
+        .theme-dark{--primary:#1a1a1a;--accent:#4a9eff;--bg:#1e1e1e;--text:#e0e0e0;--border:#3d3d3d;--card:#2d2d2d}
+        .theme-sepia{--primary:#5b4636;--accent:#8b6914;--bg:#f4ecd8;--text:#5b4636;--border:#d4c5a9;--card:#faf5e8}
+        @media(max-width:768px){.sidebar{width:200px}}
     </style>
 </head>
 <body>
-    <div class="app-container">
-        <!-- 头部 -->
-        <header class="header">
-            <div class="logo">
-                📚 深度阅读器
-            </div>
-            <div class="header-controls">
-                <button class="btn btn-secondary" id="openFileBtn">
-                    📁 打开文件
-                </button>
-                <button class="btn btn-secondary" id="notesBtn">
-                    📝 笔记
-                </button>
-                <button class="btn btn-secondary" id="settingsBtn">
-                    ⚙️ 设置
-                </button>
-            </div>
-        </header>
-
-        <!-- 主内容区 -->
-        <main class="main-content">
-            <!-- 侧边栏 -->
-            <aside class="sidebar">
-                <div class="sidebar-header">
-                    <h3>文件列表</h3>
-                </div>
-                <div class="sidebar-content">
-                    <ul class="file-list" id="fileList">
-                        <!-- 文件列表将在这里动态生成 -->
-                    </ul>
-                </div>
-            </aside>
-
-            <!-- 阅读区域 -->
-            <section class="reading-area">
-                <div class="reading-header">
-                    <div class="file-info">
-                        <span id="currentFileName">未选择文件</span>
-                    </div>
-                    <div class="reading-controls">
-                        <div class="zoom-control">
-                            <button class="zoom-btn" id="zoomOutBtn">-</button>
-                            <span class="zoom-level" id="zoomLevel">100%</span>
-                            <button class="zoom-btn" id="zoomInBtn">+</button>
-                        </div>
-                        <button class="btn btn-primary" id="newNote">
-                            📝 新建笔记
-                        </button>
-                        <button class="btn btn-primary" id="toggleNotes">
-                            👁️ 显示笔记
-                        </button>
-                        <button class="btn btn-primary" id="toggleHighlight">
-                            🖍️ 切换高亮模式
-                        </button>
-                        <button class="btn btn-primary" id="clearHighlights">
-                            🧹 清除所有高亮
-                        </button>
-                        <button class="btn btn-primary" id="fontSettings">
-                            🔤 字体设置
-                        </button>
-                        <button class="btn btn-primary" id="themeSettings">
-                            🎨 主题设置
-                        </button>
-                        <button class="btn btn-primary" id="highlightBtn">
-                            🖍️ 高亮
-                        </button>
-                        <button class="btn btn-primary" id="noteBtn">
-                            📝 笔记
-                        </button>
-                    </div>
-                </div>
-                <div class="reading-content" id="readingContent">
-                    <div class="welcome-screen">
-                        <div class="welcome-icon">📖</div>
-                        <h2 class="welcome-title">欢迎使用深度阅读器</h2>
-                        <p class="welcome-subtitle">选择文件开始阅读，或拖拽文件到下方区域</p>
-                        <div class="upload-zone" id="uploadZone">
-                            <p>📁 点击选择文件或拖拽文件到此处</p>
-                            <p style="font-size: 0.9rem; margin-top: 0.5rem; opacity: 0.7;">支持 PDF、EPUB、TXT、MD 格式</p>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <!-- 状态栏 -->
-        <footer class="status-bar">
-            <div class="status-left">
-                <span id="statusText">就绪</span>
-            </div>
-            <div class="status-right">
-                <span id="pageInfo"></span>
-                <span id="wordCount"></span>
-            </div>
-        </footer>
-    </div>
-
-    <!-- 加载遮罩 -->
-    <div class="loading" id="loadingOverlay">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <p>正在加载文件...</p>
+    <header>
+        <h1>📖 阅读器</h1>
+        <div class="header-btns">
+            <button class="btn btn-white" onclick="openFile()">📁 打开</button>
+            <button class="btn btn-white" onclick="cycleTheme()">🎨 主题</button>
         </div>
+    </header>
+    <div class="main">
+        <aside class="sidebar">
+            <div class="sidebar-header">文件列表</div>
+            <div class="search-box"><input type="text" id="searchInput" placeholder="搜索..." oninput="filterFiles()"></div>
+            <div class="file-list" id="fileList"></div>
+        </aside>
+        <section class="reading">
+            <div class="reading-header">
+                <span id="currentFile">未选择文件</span>
+                <div class="reading-controls">
+                    <div class="zoom">
+                        <button onclick="zoom(-10)">-</button>
+                        <span class="zoom-level" id="zoomLevel">100%</span>
+                        <button onclick="zoom(10)">+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="content" id="content">
+                <div class="welcome">
+                    <div class="welcome-icon">📖</div>
+                    <h2>欢迎使用阅读器</h2>
+                    <p>支持 TXT、MD 格式</p>
+                    <div class="upload-zone" id="uploadZone" onclick="openFile()">
+                        <p>📁 点击或拖拽文件到此处</p>
+                    </div>
+                </div>
+            </div>
+        </section>
     </div>
-
-    <!-- 通知 -->
+    <div class="status">
+        <span id="statusText">就绪</span>
+        <span id="fileInfo"></span>
+    </div>
+    <div class="loading" id="loading"><div class="loading-box"><div class="spinner"></div><p>加载中...</p></div></div>
     <div class="notification" id="notification"></div>
+    <input type="file" id="fileInput" accept=".txt,.md,.text" style="display:none" onchange="handleFile(this.files[0])">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+let currentZoom=100,files=[],currentFileName='',themes=['','theme-dark','theme-sepia'],themeIdx=0;
 
-    <script src="pdf-renderer.js"></script>
-    <script src="epub-renderer.js"></script>
-    <script src="floating-notes.js"></script>
-    <script src="text-highlighter.js"></script>
-    <script src="font-manager.js"></script>
-    <script src="theme-manager.js"></script>
-    <script src="renderer.js"></script>
+function openFile(){document.getElementById('fileInput').click()}
+
+function handleFile(file){
+    if(!file)return;
+    showLoading(true);
+    const reader=new FileReader();
+    reader.onload=e=>{
+        const ext=file.name.split('.').pop().toLowerCase();
+        const content=e.target.result;
+        renderContent(content,ext,file.name);
+        addToFileList(file.name,file.size,ext);
+        currentFileName=file.name;
+        document.getElementById('currentFile').textContent=file.name;
+        document.getElementById('fileInfo').textContent=formatSize(file.size);
+        showLoading(false);
+        notify('文件加载成功','success');
+    };
+    reader.onerror=()=>{showLoading(false);notify('加载失败','error')};
+    reader.readAsText(file,'utf-8');
+}
+
+function renderContent(content,ext,name){
+    const el=document.getElementById('content');
+    if(ext==='md'){
+        el.innerHTML='<div class="text-content">'+marked.parse(content)+'</div>';
+    }else{
+        const html=content.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+        el.innerHTML='<div class="text-content" style="white-space:pre-wrap">'+html+'</div>';
+    }
+}
+
+function addToFileList(name,size,ext){
+    files=files.filter(f=>f.name!==name);
+    files.unshift({name,size,ext});
+    files=files.slice(0,20);
+    renderFileList();
+}
+
+function renderFileList(filter=''){
+    const list=document.getElementById('fileList');
+    const filtered=filter?files.filter(f=>f.name.toLowerCase().includes(filter)):files;
+    list.innerHTML=filtered.length?filtered.map(f=>`<div class="file-item ${f.name===currentFileName?'active':''}" onclick="loadFromList('${f.name}')"><div class="file-name">${f.name}</div><div class="file-meta">${formatSize(f.size)} · ${f.ext.toUpperCase()}</div></div>`).join(''):'<div style="padding:1rem;text-align:center;color:#999;font-size:0.85rem">暂无文件</div>';
+}
+
+function loadFromList(name){
+    document.getElementById('currentFile').textContent=name;
+    currentFileName=name;
+    renderFileList();
+}
+
+function filterFiles(){renderFileList(document.getElementById('searchInput').value.toLowerCase())}
+
+function zoom(d){currentZoom=Math.max(50,Math.min(200,currentZoom+d));document.getElementById('zoomLevel').textContent=currentZoom+'%';const c=document.getElementById('content').querySelector('.text-content');if(c)c.style.fontSize=currentZoom+'%'}
+
+function cycleTheme(){themeIdx=(themeIdx+1)%themes.length;document.body.className=themes[themeIdx]}
+
+function formatSize(b){if(b===0)return'0 B';const k=1024,s=['B','KB','MB','GB'];const i=Math.floor(Math.log(b)/Math.log(k));return(b/Math.pow(k,i)).toFixed(1)+' '+s[i]}
+
+function showLoading(show){document.getElementById('loading').classList.toggle('show',show)}
+function notify(msg,type='success'){const n=document.getElementById('notification');n.textContent=msg;n.className='notification '+type+' show';setTimeout(()=>n.classList.remove('show'),3000)}
+
+const zone=document.getElementById('uploadZone');
+['dragenter','dragover'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.add('dragover')}));
+['dragleave','drop'].forEach(e=>zone.addEventListener(e,ev=>{ev.preventDefault();zone.classList.remove('dragover')}));
+zone.addEventListener('drop',e=>{if(e.dataTransfer.files.length)handleFile(e.dataTransfer.files[0])});
+document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.key==='o'){e.preventDefault();openFile()}});
+</script>
 </body>
 </html>
